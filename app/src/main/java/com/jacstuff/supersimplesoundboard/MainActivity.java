@@ -180,11 +180,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-
-
-
-
-
         private void listExternalStorage() {
             String state = Environment.getExternalStorageState();
 

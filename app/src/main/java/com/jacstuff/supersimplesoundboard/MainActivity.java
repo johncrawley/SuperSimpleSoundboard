@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
 
 
-    private Button playButton, reverbButton;
+    private Button playButton, reverbButton, fButton, gButton, aButton;
     private MediaPlayer mediaPlayer;
     private PresetReverb presetReverb;
     private  android.media.audiofx.EnvironmentalReverb environmentalReverb;
@@ -43,18 +44,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //1filesDir();
 
         playButton = findViewById(R.id.test_sound_button);
+        fButton = findViewById(R.id.f1_button);
+        gButton = findViewById(R.id.g1_button);
+        aButton = findViewById(R.id.a1_button);
         reverbButton = findViewById(R.id.reverbButton);
-        playButton.setText("Play Sound");
         assignTrack();
         playButton.setOnClickListener(playListener);
         int audioSessionId = mediaPlayer.getAudioSessionId();
         presetReverb = new PresetReverb(0, mediaPlayer.getAudioSessionId());
         environmentalReverb = new EnvironmentalReverb(0, mediaPlayer.getAudioSessionId());
-        environmentalReverb.setDecayTime(200);
+        environmentalReverb.setDecayTime(2000);
         environmentalReverb.setReverbLevel((short) 8);
         presetReverb.setPreset(PresetReverb.PRESET_LARGEHALL);
         presetReverb.setEnabled(false);
         reverbButton.setOnClickListener(this);
+        mediaPlayer.setOnCompletionListener(this);
     }
 
 
@@ -77,9 +81,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+
     private void assignTrack(){
-        mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.test_note);
+        mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.hylophone_f);
     }
+
 
     private final View.OnClickListener playListener = new View.OnClickListener() {
 
@@ -87,19 +93,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onClick(View v) {
             if(mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
-                mediaPlayer.reset();
+                try {
+                    mediaPlayer.prepare();
+                    mediaPlayer.seekTo(0);
+                    mediaPlayer.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                // mediaPlayer.reset();
                 System.out.println("audio session id :" + mediaPlayer.getAudioSessionId());
             }
-            else {
-                mediaPlayer.start();
-            }
+            mediaPlayer.start();
         }
     };
+
 
     @Override
     public void onCompletion(MediaPlayer mp) {
         //mediaPlayer.release();
-        mediaPlayer.reset();
+        try {
+            mediaPlayer.stop();
+            mediaPlayer.prepare();
+            mediaPlayer.seekTo(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -218,10 +236,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             for(File f: files){
                 System.out.println("**** " + f.getAbsolutePath());
             }
-
             System.out.println("Environment music :"  + Environment.DIRECTORY_MUSIC);
-
         }
+
 
         private void getMusicDir(){
             String music = Environment.DIRECTORY_MUSIC;

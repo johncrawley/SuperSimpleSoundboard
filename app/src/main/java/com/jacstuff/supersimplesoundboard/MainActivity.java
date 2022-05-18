@@ -3,91 +3,62 @@ package com.jacstuff.supersimplesoundboard;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.media.MediaPlayer;
-import android.media.audiofx.EnvironmentalReverb;
-import android.media.audiofx.PresetReverb;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, MediaPlayer.OnCompletionListener {
+public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
 
-    /*
-
-        list view
-        open soundsboards dir each time activity starts, get names of files
-            - turn names of files into string list items
-            - click list item go to new activity
-             - grid - each item corresponds to file in chosen dir
-             - click on file, play sound
-     */
-
-
-    private Button playButton, reverbButton, fButton, gButton, aButton;
-    private MediaPlayer mediaPlayer;
     private Map<Integer, MediaPlayer> mediaPlayerMap;
     private List<Integer> playingIds;
-    private PresetReverb presetReverb;
-    private  android.media.audiofx.EnvironmentalReverb environmentalReverb;
-    private final int POLOPHONY = 4;
+    private final int POLYPHONY = 4;
+    private Map<Integer, Integer> soundMap;
+    private LinearLayout buttonLayout;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        buttonLayout = findViewById(R.id.buttonLayout);
+        mediaPlayerMap = new HashMap<>(POLYPHONY);
+        soundMap = new HashMap<>(100);
 
-        mediaPlayerMap = new HashMap<>(POLOPHONY);
         playingIds = new CopyOnWriteArrayList<>();
 
-
-        playButton = findViewById(R.id.test_sound_button);
-        fButton = findViewById(R.id.f1_button);
-        gButton = findViewById(R.id.g1_button);
-        aButton = findViewById(R.id.a1_button);
-        reverbButton = findViewById(R.id.reverbButton);
-        assignTrack();
-        playButton.setOnClickListener(playListener);
-        int audioSessionId = mediaPlayer.getAudioSessionId();
-        presetReverb = new PresetReverb(0, mediaPlayer.getAudioSessionId());
-        environmentalReverb = new EnvironmentalReverb(0, mediaPlayer.getAudioSessionId());
-        environmentalReverb.setDecayTime(2000);
-        environmentalReverb.setReverbLevel((short) 8);
-        presetReverb.setPreset(PresetReverb.PRESET_LARGEHALL);
-        presetReverb.setEnabled(false);
-        reverbButton.setOnClickListener(this);
-        mediaPlayer.setOnCompletionListener(this);
+        setupButton(R.id.f1_button, R.raw.hylophone_f, "F");
+        setupButton(R.id.g1_button, R.raw.hylophone_g, "G");
+        setupButton(R.id.a1_button, R.raw.hylophone_a1, "A");
     }
 
+
+    private void setupButton(int viewId, int soundResId, String text){
+        soundMap.put(viewId, soundResId);
+        Button button = new Button(this);
+        button.setText(text);
+        button.setId(viewId);
+        buttonLayout.addView(button);
+        button.setOnClickListener(playListener);
+    }
 
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(mediaPlayer != null) {
-            mediaPlayer.release();
-        }
+        mediaPlayerMap.values().forEach(mp -> { if(mp!= null) mp.release();});
     }
 
-
-    @Override
-    public void onClick(View v) {
-        int viewId = v.getId();
-        if(viewId == R.id.reverbButton){
-            presetReverb.setEnabled(!presetReverb.getEnabled());
-            environmentalReverb.setEnabled(!environmentalReverb.getEnabled());
-        }
-    }
-
-
+/*
     private void assignTrack(){
-        mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.hylophone_f);
-    }
+        //mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.hylophone_f);
+    }*/
 
 
     private final View.OnClickListener playListener = new View.OnClickListener() {
@@ -95,10 +66,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onClick(View v) {
             int id = v.getId();
-            int resId = R.raw.hylophone_a1;
+            Integer resId = soundMap.get(id);
+            if(resId == null){
+                resId = R.raw.test_note;
+            }
             playSound(id, resId);
-            resetAndStartIfAlreadyPlaying(mediaPlayer);
-            mediaPlayer.start();
         }
     };
 
@@ -132,12 +104,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             playingIds.add(id);
             return;
         }
-        if(mediaPlayerMap.size() >= POLOPHONY){
+        if(mediaPlayerMap.size() >= POLYPHONY){
             int oldestId = playingIds.remove(0);
-            mediaPlayerMap.remove(oldestId);
+            MediaPlayer mp = mediaPlayerMap.remove(oldestId);
+            if(mp != null) {
+                mp.stop();
+                mp.release();
+            }
         }
         playingIds.add(id);
-        mediaPlayerMap.put(id, createAndPlay(resId));
+        MediaPlayer mp = createAndPlay(resId);
+        mediaPlayerMap.put(id, mp);
 
     }
 
@@ -145,22 +122,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private MediaPlayer createAndPlay(int resId){
         MediaPlayer mediaPlayer = MediaPlayer.create(this, resId);
         try{
-            mediaPlayer.prepare();
             mediaPlayer.start();
-        }catch (IOException e){
+        }catch (Exception e){
             e.printStackTrace();
         }
         return mediaPlayer;
     }
 
+
     private void removeOldPlayingId(int oldId){
-        Iterator <Integer> iterator = playingIds.iterator();
-        while(iterator.hasNext()){
-            int id = iterator.next();
-            if(id == oldId){
-                iterator.remove();
-            }
-        }
+        playingIds.removeIf(id -> id == oldId);
     }
 
 
@@ -168,9 +139,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onCompletion(MediaPlayer mp) {
         //mediaPlayer.release();
         try {
-            mediaPlayer.stop();
-            mediaPlayer.prepare();
-            mediaPlayer.seekTo(0);
+            mp.stop();
+            mp.prepare();
+            mp.seekTo(0);
         } catch (IOException e) {
             e.printStackTrace();
         }

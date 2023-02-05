@@ -2,13 +2,22 @@ package com.jacstuff.supersimplesoundboard;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.res.AssetFileDescriptor;
+import android.media.AudioAttributes;
 import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import com.google.android.material.button.MaterialButton;
+
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +30,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     private final int POLYPHONY = 4;
     private Map<Integer, Integer> soundMap;
     private LinearLayout buttonLayout;
+    private SoundPool soundPool;
+    private int soundId;
 
 
     @Override
@@ -30,12 +41,48 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         buttonLayout = findViewById(R.id.buttonLayout);
         mediaPlayerMap = new HashMap<>(POLYPHONY);
         soundMap = new HashMap<>(100);
-
         playingIds = new CopyOnWriteArrayList<>();
+        assignButtonLayout2();
+        setupSoundPool();
+        SoundFactory soundFactory = new SoundFactory();
+        SoundBank soundBank = soundFactory.getSoundBank("volcanic");
 
-        setupButton(R.id.f1_button, R.raw.hylophone_f, "F");
-        setupButton(R.id.g1_button, R.raw.hylophone_g, "G");
-        setupButton(R.id.a1_button, R.raw.hylophone_a1, "A");
+        for(Sound sound : soundBank.getSounds()){
+            loadSound(sound);
+        }
+
+       // setupButton(R.id.f1_button, R.raw.hylophone_f, "F");
+       // setupButton(R.id.g1_button, R.raw.hylophone_g, "G");
+        // setupButton(R.id.a1_button, R.raw.hylophone_a1, "A");
+
+    }
+
+
+    private void log(String msg){
+        System.out.println("^^^ MainActivity: "  + msg);
+    }
+
+
+    private void setupSoundPool(){
+        AudioAttributes attributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        soundPool = new SoundPool.Builder()
+                .setMaxStreams(6)
+                .setAudioAttributes(attributes)
+                .build();
+    }
+
+
+    private void loadSound(Sound sound){
+        try (AssetFileDescriptor afd = getAssets().openFd(sound.getPath()) ){
+            int soundId = soundPool.load(afd, 1);
+            sound.setSoundPoolId(soundId);
+            setupButton(sound);
+        }catch (IOException e){
+            e.printStackTrace();;
+        }
     }
 
 
@@ -48,6 +95,33 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         button.setOnClickListener(playListener);
     }
 
+    LinearLayout.LayoutParams buttonParams;
+
+    private void setupButton(Sound sound){
+        MaterialButton button = new MaterialButton(this);
+        button.setPadding(2,2,2,2);
+        button.setLayoutParams(buttonParams);
+        button.setText(sound.getDisplayName());
+        button.setId(View.generateViewId());
+        buttonLayout.addView(button);
+        button.setOnClickListener(v ->{
+            soundPool.play(sound.getSoundPoolId(), 100,100, 1, 0,1);
+        });
+    }
+
+
+    private void assignButtonLayout(){
+        buttonParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                100);
+        buttonParams.setMargins(-20,-10,-20,-10);
+    }
+
+
+    private void assignButtonLayout2(){
+        buttonParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                100);
+        buttonParams.setMargins(-20,-10,-20,-10);
+    }
 
     @Override
     public void onDestroy() {

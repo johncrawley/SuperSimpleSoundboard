@@ -9,7 +9,7 @@ public enum Note {
     A("A"),
     A_SHARP("A#"),
     B("B"),
-    C("C "),
+    C("C"),
     C_SHARP("C#"),
     D("D"),
     D_SHARP("D#"),

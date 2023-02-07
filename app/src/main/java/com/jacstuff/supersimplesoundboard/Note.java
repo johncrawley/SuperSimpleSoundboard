@@ -15,7 +15,7 @@ public enum Note {
     D_SHARP("D#"),
     E("E");
 
-    private String displayName, filePrefix;
+    private final String displayName, filePrefix;
 
 
     Note(String displayName){

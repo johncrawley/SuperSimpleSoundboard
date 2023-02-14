@@ -27,8 +27,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         buttonLayout = findViewById(R.id.buttonLayout);
+        assignButtonLayout();
+        setupSoundPool();
+        loadSounds();
+    }
+
+
+    private void setMotionListenerOnParentView(){
         buttonLayout.setOnGenericMotionListener((view, motionEvent) -> {
 
             log(" onCreate() buttonLayout motionEvent detected! " + motionEvent.getX() + " event: " + motionEvent.getAction());
@@ -51,15 +57,6 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
-
-        assignButtonLayout();
-        setupSoundPool();
-        SoundFactory soundFactory = new SoundFactory();
-        SoundBank soundBank = soundFactory.getSoundBank("volcanic");
-
-        for(Sound sound : soundBank.getSounds()){
-            loadSound(sound);
-        }
     }
 
 
@@ -73,10 +70,22 @@ public class MainActivity extends AppCompatActivity {
                 .setUsage(AudioAttributes.USAGE_GAME)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build();
+
         soundPool = new SoundPool.Builder()
                 .setMaxStreams(6)
                 .setAudioAttributes(attributes)
                 .build();
+
+    }
+
+
+    private void loadSounds(){
+        SoundFactory soundFactory = new SoundFactory();
+        SoundBank soundBank = soundFactory.getSoundBank("n_bass");
+
+        for(Sound sound : soundBank.getSounds()){
+            loadSound(sound);
+        }
     }
 
 
@@ -100,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         button.setId(View.generateViewId());
         button.setTag(sound.getSoundPoolId());
         buttonLayout.addView(button);
-        //button.setOnClickListener(v -> soundPool.play(sound.getSoundPoolId(), 100,100, 1, 0,1));
+        button.setOnClickListener(v -> soundPool.play(sound.getSoundPoolId(), 100,100, 1, 0,1));
         /*
         button.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();

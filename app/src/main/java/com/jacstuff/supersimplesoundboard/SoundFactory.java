@@ -17,6 +17,7 @@ public class SoundFactory {
 
     private void createSoundBanks(){
         addSoundBank("volcanic", 8);
+        addSoundBank("n_bass", 8);
     }
 
 

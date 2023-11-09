@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
                 .setMaxStreams(6)
                 .setAudioAttributes(attributes)
                 .build();
-
     }
 
 

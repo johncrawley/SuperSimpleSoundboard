@@ -7,7 +7,6 @@ import android.content.res.AssetFileDescriptor;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -21,7 +20,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout buttonLayout;
     private SoundPool soundPool;
     private LinearLayout.LayoutParams buttonParams;
-    private int previousId;
+
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,32 +31,6 @@ public class MainActivity extends AppCompatActivity {
         assignButtonLayout();
         setupSoundPool();
         loadSounds();
-    }
-
-
-    private void setMotionListenerOnParentView(){
-        buttonLayout.setOnGenericMotionListener((view, motionEvent) -> {
-
-            log(" onCreate() buttonLayout motionEvent detected! " + motionEvent.getX() + " event: " + motionEvent.getAction());
-
-            if(motionEvent.getAction() == MotionEvent.ACTION_MOVE){
-                log("button layout children count: " + buttonLayout.getChildCount());
-                for(int i=0; i < buttonLayout.getChildCount(); i++){
-                    View buttonKey = buttonLayout.getChildAt(i);
-                    if(doesViewContain(buttonKey, (int)motionEvent.getX(), (int)motionEvent.getY())) {
-                        log("button contains x y!");
-                        int soundId = (int) buttonKey.getTag();
-                        if (soundId != previousId) {
-                            soundPool.play(soundId, 100, 100, 1, 0, 1);
-                            previousId = soundId;
-                        }
-                        break;
-                    }
-                }
-                log("view group action move!");
-            }
-            return false;
-        });
     }
 
 
@@ -109,48 +83,9 @@ public class MainActivity extends AppCompatActivity {
         button.setTag(sound.getSoundPoolId());
         buttonLayout.addView(button);
         button.setOnClickListener(v -> soundPool.play(sound.getSoundPoolId(), 100,100, 1, 0,1));
-        /*
-        button.setOnTouchListener((view, motionEvent) -> {
-            int action = motionEvent.getAction();
-            boolean hasSoundPlayed = false;
-            switch(action ){
-                case MotionEvent.ACTION_DOWN :
 
-                    log("setupButton touch listener, action_down!");
-                    soundPool.play(sound.getSoundPoolId(), 100,100, 1, 0,1);
-                    hasSoundPlayed = true;
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    log("setupButton touch listener, move: sound id: "+  sound.getSoundPoolId());
-                    hasSoundPlayed = false;
-                    float x = motionEvent.getX();
-                    float y = motionEvent.getY();
-
-                    if(!doesViewContain(view, (int)x, (int) y)){
-                        log("");
-                        view.callOnClick();
-                    }
-                    break;
-            }
-            return false;
-        });
-
-         */
     }
 
-    private boolean doesViewContain(View view, int motionX, int motionY) {
-        int[] l = new int[2];
-        view.getLocationOnScreen(l);
-        int x = l[0];
-        int y = l[1];
-        int w = view.getWidth();
-        int h = view.getHeight();
-
-        if (motionX < x || motionX > x + w || motionY < y || motionY > y + h) {
-            return false;
-        }
-        return true;
-    }
 
 
     private void assignButtonLayout(){

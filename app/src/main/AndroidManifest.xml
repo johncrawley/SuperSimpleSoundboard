@@ -20,6 +20,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+
+        <service
+            android:name=".service.SoundBoardService"
+            android:label="SoundBoardService"
+            android:enabled="true"
+            android:stopWithTask="true" />
     </application>
 
 </manifest>

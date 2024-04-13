@@ -5,7 +5,7 @@ public class Sound {
     private final String name;
     private int soundPoolId;
     private final String path;
-    private int octave;
+    private final int octave;
 
 
     public Sound(Note note, String path, int octave ){

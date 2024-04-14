@@ -23,8 +23,17 @@ public class SoundLooperTest {
         soundLooper.recordSound(2);
         soundLooper.recordSound(1);
         soundLooper.stopRecording();
-        assertEquals(3, soundLooper.getNumberOfSoundsRecorded());
+        assertNumberOfSounds(3);
+        soundLooper.recordSound(3);
+        assertNumberOfSounds(3);
+        soundLooper.startRecording();
+        soundLooper.recordSound(1);
+        soundLooper.stopRecording();
+        assertNumberOfSounds(4);
     }
 
 
+    private void assertNumberOfSounds(int expectedNumberOfSounds){
+        assertEquals(expectedNumberOfSounds, soundLooper.getNumberOfSoundsRecorded());
+    }
 }

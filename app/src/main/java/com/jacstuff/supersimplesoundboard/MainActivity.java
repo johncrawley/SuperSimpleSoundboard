@@ -3,23 +3,20 @@ package com.jacstuff.supersimplesoundboard;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
-import android.content.res.AssetFileDescriptor;
-import android.media.AudioAttributes;
-import android.media.SoundPool;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.google.android.material.button.MaterialButton;
+import com.jacstuff.supersimplesoundboard.service.SoundPlayer;
 
-import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
     private LinearLayout buttonLayout;
-    private SoundPool soundPool;
     private LinearLayout.LayoutParams buttonParams;
+    private SoundPlayer soundPlayer;
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -29,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         buttonLayout = findViewById(R.id.buttonLayout);
         assignButtonLayout();
-        setupSoundPool();
+        soundPlayer = new SoundPlayer(getApplicationContext());
         loadSounds();
     }
 
@@ -39,36 +36,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void setupSoundPool(){
-        AudioAttributes attributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_GAME)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build();
-
-        soundPool = new SoundPool.Builder()
-                .setMaxStreams(6)
-                .setAudioAttributes(attributes)
-                .build();
-    }
-
-
     private void loadSounds(){
         SoundFactory soundFactory = new SoundFactory();
         SoundBank soundBank = soundFactory.getSoundBank("n_bass");
 
+        int current = 0;
         for(Sound sound : soundBank.getSounds()){
-            loadSound(sound);
-        }
-    }
-
-
-    private void loadSound(Sound sound){
-        try (AssetFileDescriptor afd = getAssets().openFd(sound.getPath()) ){
-            int soundId = soundPool.load(afd, 1);
-            sound.setSoundPoolId(soundId);
+            soundPlayer.loadSound(sound);
             setupButton(sound);
-        }catch (IOException e){
-            e.printStackTrace();
+            if(current++ > 7){
+                break;
+            }
         }
     }
 
@@ -82,10 +60,8 @@ public class MainActivity extends AppCompatActivity {
         button.setId(View.generateViewId());
         button.setTag(sound.getSoundPoolId());
         buttonLayout.addView(button);
-        button.setOnClickListener(v -> soundPool.play(sound.getSoundPoolId(), 100,100, 1, 0,1));
-
+        button.setOnClickListener(v -> soundPlayer.playSound(sound));
     }
-
 
 
     private void assignButtonLayout(){
@@ -93,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
                 100);
         buttonParams.setMargins(-20,-10,-20,-10);
     }
-
 
 
 }

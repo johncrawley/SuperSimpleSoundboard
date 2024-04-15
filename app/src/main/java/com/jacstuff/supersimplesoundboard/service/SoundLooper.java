@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class SoundLooper {
@@ -13,7 +14,7 @@ public class SoundLooper {
     private long endTime;
     private long duration;
     private int numberOfSoundsRecorded;
-
+    private boolean isRecording;
 
     public SoundLooper(){
         recordedSounds = new HashMap<>(100);
@@ -26,13 +27,16 @@ public class SoundLooper {
 
 
     public void startRecording(){
+        isRecording = true;
         startTime = System.currentTimeMillis();
     }
 
 
     public void recordSound(int soundId){
-        numberOfSoundsRecorded++;
-        recordedSounds.computeIfAbsent(getCurrentTimeElapsed(), k -> new HashSet<>()).add(soundId);
+        if(isRecording){
+            numberOfSoundsRecorded++;
+            recordedSounds.computeIfAbsent(getCurrentTimeElapsed(), k -> new HashSet<>()).add(soundId);
+        }
     }
 
 
@@ -42,6 +46,7 @@ public class SoundLooper {
 
 
     public void stopRecording(){
+        isRecording = false;
         endTime = System.currentTimeMillis();
         duration = endTime - startTime;
     }

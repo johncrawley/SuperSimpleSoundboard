@@ -6,7 +6,7 @@ public class Sound {
     private int soundPoolId;
     private final String path;
     private final int octave;
-
+    private int buttonNumber;
 
     public Sound(Note note, String path, int octave ){
         this.name = note.getDisplayName();
@@ -15,10 +15,18 @@ public class Sound {
     }
 
 
+
     public void setSoundPoolId(int soundPoolId){
         this.soundPoolId = soundPoolId;
     }
 
+    public void setButtonNumber(int buttonNumber){
+        this.buttonNumber = buttonNumber;
+    }
+
+    public int getButtonNumber(){
+        return buttonNumber;
+    }
 
     public String getDisplayName(){
         return name;

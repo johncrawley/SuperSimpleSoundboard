@@ -6,7 +6,7 @@ import java.util.List;
 
 public class SoundBank {
 
-    private String name;
+    private final String name;
     private final List<Sound> sounds;
 
     public SoundBank(String name){

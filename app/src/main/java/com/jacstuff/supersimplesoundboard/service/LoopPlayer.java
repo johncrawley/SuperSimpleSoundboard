@@ -2,13 +2,15 @@ package com.jacstuff.supersimplesoundboard.service;
 
 import com.jacstuff.supersimplesoundboard.view.LoopView;
 
+
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 public class LoopPlayer {
 
     private final ScheduledExecutorService executorService;
@@ -18,6 +20,7 @@ public class LoopPlayer {
     int currentTime = 0;
     private final AtomicBoolean isPlaying = new AtomicBoolean(false);
     private LoopView loopView;
+    private final Set<Integer> mutedLayers = new HashSet<>();
 
     public LoopPlayer(LoopRecorder loopRecorder, SoundPlayer soundPlayer){
         executorService = Executors.newScheduledThreadPool(1);
@@ -34,6 +37,7 @@ public class LoopPlayer {
     public void play(){
         currentTime = 0;
         isPlaying.set(true);
+        getView().ifPresent(LoopView::notifyLoopPlaying);
         future = executorService.scheduleAtFixedRate(this::playNextSound, 0, loopRecorder.getTimeDivisor(), TimeUnit.MILLISECONDS);
     }
 
@@ -42,7 +46,13 @@ public class LoopPlayer {
         if(isPlaying.get()){
             future.cancel(false);
             isPlaying.set(false);
+            getView().ifPresent(LoopView::notifyLoopStopped);
         }
+    }
+
+
+    private Optional<LoopView> getView(){
+        return Optional.ofNullable(loopView);
     }
 
 
@@ -53,11 +63,38 @@ public class LoopPlayer {
     }
 
 
+    public void toggleMuted(int layerIndex){
+        if(mutedLayers.contains(layerIndex)){
+            unMuteLayer(layerIndex);
+            return;
+        }
+        muteLayer(layerIndex);
+    }
+
+
+    private void muteLayer(int layerIndex){
+        mutedLayers.add(layerIndex);
+    }
+
+
+    private void unMuteLayer(int layerIndex){
+        mutedLayers.remove(layerIndex);
+    }
+
+
     private void playNextSound(){
-        Set<Integer> buttonNumbers = loopRecorder.getSoundsForTime(currentTime);
-        buttonNumbers.forEach(soundPlayer::playSoundAtButton);
+        Set<RecordedSounds> recordedSounds = loopRecorder.getSoundsForTime(currentTime);
+        recordedSounds.stream()
+                .filter(this::isNotMuted)
+                .forEach(rs -> rs.soundIds().
+                        forEach(soundPlayer::playSoundAtButton));
         updateCurrentTime();
         updateLoopViewProgress();
+    }
+
+
+    private boolean isNotMuted(RecordedSounds recordedSounds){
+        return !mutedLayers.contains(recordedSounds.index());
     }
 
 

@@ -6,7 +6,7 @@ public interface LoopView {
     void notifyEndTime(long endTime);
     void notifyLoopRecordingStarted();
     void notifyLoopRecordingCleared();
-    void notifyLoopStartedPlaying();
-    void notifyLoopStoppedPlaying();
+    void notifyLoopPlaying();
+    void notifyLoopStopped();
     void notifyLoopProgress(int progress);
 }

@@ -26,7 +26,6 @@ public class SoundPlayer {
 
 
     public void playSound(Sound sound){
-        log("Entered playSound() " + sound.getDisplayName());
         soundPool.play(sound.getSoundPoolId(), 100,100, 1, 0,0.8f);
     }
 
@@ -36,7 +35,6 @@ public class SoundPlayer {
             int soundId = soundPool.load(afd, 1);
             sound.setSoundPoolId(soundId);
             soundMap.put(sound.getButtonNumber(), sound);
-            soundMap.keySet().forEach(k -> log("loadSound() key: " + k));
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -44,16 +42,10 @@ public class SoundPlayer {
 
 
     public void playSoundAtButton(int buttonNumber){
-        log("Entered playSoundAtButton: " + buttonNumber);
         Sound sound = soundMap.get(buttonNumber);
         if(sound != null){
             playSound(sound);
         }
-    }
-
-
-    private void log(String msg){
-        System.out.println("^^^ SoundPlayer: " + msg);
     }
 
 

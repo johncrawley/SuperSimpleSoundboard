@@ -2,14 +2,20 @@ package com.jacstuff.supersimplesoundboard.service;
 
 import com.jacstuff.supersimplesoundboard.view.LoopView;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class LoopRecorder {
 
+    private final List<SoundLayer> soundLayers;
+    private SoundLayer currentLayer;
     private final Map<Long, Set<Integer>> recordedSounds;
     private long startTime;
     private long endTime;
@@ -19,15 +25,23 @@ public class LoopRecorder {
     private final int timeDivisor = 20;
     private LoopView loopView;
     private boolean isInitialLoop = true;
+    private int layerIndex;
 
 
     public LoopRecorder(){
+        soundLayers = new ArrayList<>();
+        currentLayer = new SoundLayer(layerIndex);
         recordedSounds = new HashMap<>(100);
     }
 
 
     public void setLoopView(LoopView loopView){
         this.loopView = loopView;
+    }
+
+
+    private Optional<LoopView> getView(){
+        return Optional.ofNullable(loopView);
     }
 
 
@@ -46,12 +60,13 @@ public class LoopRecorder {
 
 
     public void startRecording(){
-        log("Entered startRecording()");
         if(isRecording){
             return;
         }
         isRecording = true;
         startTime = -1;
+        currentLayer = new SoundLayer(layerIndex);
+        getView().ifPresent(LoopView::notifyLoopRecordingStarted);
     }
 
 
@@ -63,6 +78,7 @@ public class LoopRecorder {
     public void recordSound(int soundId){
         if(isRecording){
             numberOfSoundsRecorded++;
+            currentLayer.addSound(getCurrentTimeElapsed(), soundId);
             recordedSounds.computeIfAbsent(getCurrentTimeElapsed(), k -> new HashSet<>()).add(soundId);
         }
     }
@@ -83,10 +99,20 @@ public class LoopRecorder {
             return;
         }
         isRecording = false;
-        endTime = getCurrentTime();
-        duration = endTime - startTime;
-        notifyViewOfEndTime();
+        if(isInitialLoop){
+            endTime = getCurrentTime();
+            duration = endTime - startTime;
+            notifyViewOfEndTime();
+        }
+        getView().ifPresent(LoopView::notifyLoopRecordingStopped);
+        saveLayer();
         isInitialLoop = false;
+    }
+
+
+    private void saveLayer(){
+        soundLayers.add(currentLayer);
+        layerIndex++;
     }
 
 
@@ -95,7 +121,6 @@ public class LoopRecorder {
             if(isInitialLoop){
                 loopView.notifyEndTime(duration);
             }
-            loopView.notifyLoopRecordingStopped();
         }
     }
 
@@ -103,6 +128,8 @@ public class LoopRecorder {
     public void clear(){
         numberOfSoundsRecorded = 0;
         recordedSounds.clear();
+        soundLayers.clear();
+        layerIndex = 0;
         isInitialLoop = true;
         if(loopView != null){
             loopView.notifyLoopRecordingCleared();
@@ -110,8 +137,8 @@ public class LoopRecorder {
     }
 
 
-    public Set<Integer> getSoundsForTime(long time){
-        return recordedSounds.getOrDefault(time, Collections.emptySet());
+    public Set<RecordedSounds> getSoundsForTime(long time){
+        return soundLayers.stream().map(sl -> sl.getRecordedSoundsAt(time)).collect(Collectors.toSet());
     }
 
 

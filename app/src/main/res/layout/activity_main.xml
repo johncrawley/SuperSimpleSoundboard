@@ -81,7 +81,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/loopProgressLayout"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/muteLayerLayout"
         android:orientation="horizontal">
 
         <ImageButton
@@ -104,5 +104,42 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/baseline_delete_24"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/muteLayerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginHorizontal="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/muteLayer0Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/baseline_volume_off_24"/>
+        <ImageButton
+            android:id="@+id/muteLayer1Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/baseline_volume_off_24"/>
+        <ImageButton
+            android:id="@+id/muteLayer2Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/baseline_volume_off_24"/>
+        <ImageButton
+            android:id="@+id/muteLayer3Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/baseline_volume_off_24"/>
+        <ImageButton
+            android:id="@+id/muteLayer4Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/baseline_volume_off_24"/>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

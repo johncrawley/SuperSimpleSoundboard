@@ -6,7 +6,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements LoopView {
     private LoopRecorder loopRecorder;
     private LoopPlayer loopPlayer;
     private SeekBar loopProgressSeekBar;
+    private ImageButton recordButton, stopButton, playButton, clearButton;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         loadSounds();
         setupMusicButtons();
         setupRecordingButtons();
+        setupMutedButtons();
     }
 
     private void loadSounds(){
@@ -69,18 +71,19 @@ public class MainActivity extends AppCompatActivity implements LoopView {
 
     @Override
     public void notifyLoopRecordingStopped(){
+        setEnabled(true, recordButton, playButton, clearButton);
     }
 
 
     @Override
     public void notifyLoopRecordingStarted(){
-
+        setEnabled(false, recordButton, playButton, clearButton);
     }
 
 
     @Override
-    public void notifyLoopStartedPlaying(){
-
+    public void notifyLoopPlaying(){
+        setEnabled(false, recordButton, playButton, clearButton);
     }
 
 
@@ -88,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements LoopView {
     public void notifyLoopRecordingCleared(){
         loopProgressSeekBar.setProgress(0);
         loopProgressSeekBar.setMax(1);
+        setEnabled(false, playButton, clearButton);
     }
 
 
@@ -98,9 +102,31 @@ public class MainActivity extends AppCompatActivity implements LoopView {
 
 
     @Override
-    public void notifyLoopStoppedPlaying(){
-        loopProgressSeekBar.setProgress(0);
+    public void notifyLoopStopped(){
+        runOnUiThread(()->loopProgressSeekBar.setProgress(0));
+        setEnabled(true, playButton, recordButton, clearButton);
     }
+
+
+    public void setupMutedButtons(){
+        setupButton(R.id.muteLayer0Button, ()-> loopPlayer.toggleMuted(0));
+        setupButton(R.id.muteLayer1Button, ()-> loopPlayer.toggleMuted(1));
+        setupButton(R.id.muteLayer2Button, ()-> loopPlayer.toggleMuted(2));
+        setupButton(R.id.muteLayer3Button, ()-> loopPlayer.toggleMuted(3));
+        setupButton(R.id.muteLayer4Button, ()-> loopPlayer.toggleMuted(4));
+    }
+
+
+    private void setEnabled(boolean isEnabled, ImageButton... buttons){
+        log("Entered setVisibility()");
+        runOnUiThread(()->{
+            for(ImageButton button : buttons){
+                button.setEnabled(isEnabled);
+            }
+        });
+    }
+
+
 
 
     private void setupMusicButtons(){
@@ -116,20 +142,20 @@ public class MainActivity extends AppCompatActivity implements LoopView {
 
 
     private void setupRecordingButtons(){
-        setupButton(R.id.recordButton, ()-> loopRecorder.startRecording());
-        setupButton(R.id.stopButton, ()-> {
+        recordButton = setupButton(R.id.recordButton, ()-> loopRecorder.startRecording());
+        stopButton = setupButton(R.id.stopButton, ()-> {
             loopRecorder.stopRecording();
             loopPlayer.stop();
         });
-
-        setupButton(R.id.playButton, ()-> loopPlayer.play());
-        setupButton(R.id.clearButton, ()-> loopRecorder.clear());
+       playButton =  setupButton(R.id.playButton, ()-> loopPlayer.play());
+       clearButton = setupButton(R.id.clearButton, ()-> loopRecorder.clear());
     }
 
 
-    private void setupButton(int id, Runnable runnable){
-        View button = findViewById(id);
+    private ImageButton setupButton(int id, Runnable runnable){
+        ImageButton button = findViewById(id);
         button.setOnClickListener(v -> runnable.run());
+        return button;
     }
 
 

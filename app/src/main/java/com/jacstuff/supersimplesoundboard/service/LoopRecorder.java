@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class SoundLooper {
+public class LoopRecorder {
 
     private final Map<Long, Set<Integer>> recordedSounds;
     private long startTime;
@@ -14,8 +14,9 @@ public class SoundLooper {
     private long duration;
     private int numberOfSoundsRecorded;
     private boolean isRecording;
+    private final int timeDivisor = 20;
 
-    public SoundLooper(){
+    public LoopRecorder(){
         recordedSounds = new HashMap<>(100);
     }
 
@@ -29,15 +30,23 @@ public class SoundLooper {
     }
 
 
+    public int getTimeDivisor(){
+        return timeDivisor;
+    }
+
+
     public void startRecording(){
         log("Entered startRecording()");
         if(isRecording){
             return;
         }
         isRecording = true;
-        startTime = System.currentTimeMillis();
+        startTime = getCurrentTime();
     }
 
+    private long getCurrentTime(){
+        return System.currentTimeMillis() / timeDivisor;
+    }
 
     public void recordSound(int soundId){
         if(isRecording){
@@ -48,7 +57,7 @@ public class SoundLooper {
 
 
     public long getCurrentTimeElapsed(){
-        return System.currentTimeMillis() - startTime;
+        return getCurrentTime() - startTime;
     }
 
 
@@ -58,8 +67,14 @@ public class SoundLooper {
             return;
         }
         isRecording = false;
-        endTime = System.currentTimeMillis();
+        endTime = getCurrentTime();
         duration = endTime - startTime;
+    }
+
+
+    public void clear(){
+        numberOfSoundsRecorded = 0;
+        recordedSounds.clear();
     }
 
 

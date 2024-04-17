@@ -7,18 +7,18 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class SoundLoopPlayer {
+public class LoopPlayer {
 
     private final ScheduledExecutorService executorService;
-    private final SoundLooper soundLooper;
+    private final LoopRecorder loopRecorder;
     private final SoundPlayer soundPlayer;
     private ScheduledFuture<?> future;
     int currentTime = 0;
     private final AtomicBoolean isPlaying = new AtomicBoolean(false);
 
-    public SoundLoopPlayer(SoundLooper soundLooper, SoundPlayer soundPlayer){
+    public LoopPlayer(LoopRecorder loopRecorder, SoundPlayer soundPlayer){
         executorService = Executors.newScheduledThreadPool(1);
-        this.soundLooper = soundLooper;
+        this.loopRecorder = loopRecorder;
         this.soundPlayer = soundPlayer;
     }
 
@@ -26,7 +26,7 @@ public class SoundLoopPlayer {
     public void play(){
         currentTime = 0;
         isPlaying.set(true);
-        future = executorService.scheduleAtFixedRate(this::playNextSound, 0, 1, TimeUnit.MILLISECONDS);
+        future = executorService.scheduleAtFixedRate(this::playNextSound, 0, loopRecorder.getTimeDivisor(), TimeUnit.MILLISECONDS);
     }
 
 
@@ -39,7 +39,7 @@ public class SoundLoopPlayer {
 
 
     private void playNextSound(){
-        Set<Integer> buttonNumbers = soundLooper.getSoundsForTime(currentTime);
+        Set<Integer> buttonNumbers = loopRecorder.getSoundsForTime(currentTime);
         buttonNumbers.forEach(soundPlayer::playSoundAtButton);
         updateCurrentTime();
     }
@@ -47,7 +47,7 @@ public class SoundLoopPlayer {
 
     private void updateCurrentTime(){
         currentTime++;
-        if(currentTime > soundLooper.getDuration()){
+        if(currentTime > loopRecorder.getDuration()){
             currentTime = 0;
         }
     }

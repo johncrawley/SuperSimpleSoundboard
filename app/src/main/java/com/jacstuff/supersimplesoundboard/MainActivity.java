@@ -10,8 +10,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.google.android.material.button.MaterialButton;
-import com.jacstuff.supersimplesoundboard.service.SoundLoopPlayer;
-import com.jacstuff.supersimplesoundboard.service.SoundLooper;
+import com.jacstuff.supersimplesoundboard.service.LoopPlayer;
+import com.jacstuff.supersimplesoundboard.service.LoopRecorder;
 import com.jacstuff.supersimplesoundboard.service.SoundPlayer;
 
 import java.util.List;
@@ -23,8 +23,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout.LayoutParams buttonParams;
     private SoundPlayer soundPlayer;
     private SoundBank soundBank;
-    private SoundLooper soundLooper;
-    private SoundLoopPlayer soundLoopPlayer;
+    private LoopRecorder loopRecorder;
+    private LoopPlayer loopPlayer;
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -35,8 +35,8 @@ public class MainActivity extends AppCompatActivity {
         buttonLayout = findViewById(R.id.buttonLayout);
         assignButtonLayout();
         soundPlayer = new SoundPlayer(getApplicationContext());
-        soundLooper = new SoundLooper();
-        soundLoopPlayer = new SoundLoopPlayer(soundLooper, soundPlayer);
+        loopRecorder = new LoopRecorder();
+        loopPlayer = new LoopPlayer(loopRecorder, soundPlayer);
         loadSounds();
         setupMusicButtons();
         setupRecordingButtons();
@@ -68,18 +68,19 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void setupRecordingButtons(){
-        setupButton(R.id.recordButton, ()-> soundLooper.startRecording());
+        setupButton(R.id.recordButton, ()-> loopRecorder.startRecording());
         setupButton(R.id.stopButton, ()-> {
-            soundLooper.stopRecording();
-            soundLoopPlayer.stop();
+            loopRecorder.stopRecording();
+            loopPlayer.stop();
         });
 
-        setupButton(R.id.playButton, ()-> soundLoopPlayer.play());
+        setupButton(R.id.playButton, ()-> loopPlayer.play());
+        setupButton(R.id.clearButton, ()-> loopRecorder.clear());
     }
 
 
     private void setupButton(int id, Runnable runnable){
-        Button button = findViewById(id);
+        View button = findViewById(id);
         button.setOnClickListener(v -> runnable.run());
     }
 
@@ -94,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         buttonLayout.addView(button);
         button.setOnClickListener(v -> {
             soundPlayer.playSound(sound);
-            soundLooper.recordSound(sound.getButtonNumber());
+            loopRecorder.recordSound(sound.getButtonNumber());
         });
     }
 

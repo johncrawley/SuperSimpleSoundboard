@@ -27,7 +27,7 @@ public class SoundPlayer {
 
     public void playSound(Sound sound){
         log("Entered playSound() " + sound.getDisplayName());
-        soundPool.play(sound.getSoundPoolId(), 100,100, 1, 0,1);
+        soundPool.play(sound.getSoundPoolId(), 100,100, 1, 0,0.8f);
     }
 
 

@@ -21,6 +21,9 @@ public class LoopPlayer {
     private final AtomicBoolean isPlaying = new AtomicBoolean(false);
     private LoopView loopView;
     private final Set<Integer> mutedLayers = new HashSet<>();
+    private float loopMultiplier = 1f;
+    private float nextLoopMultiplier = 1f;
+
 
     public LoopPlayer(LoopRecorder loopRecorder, SoundPlayer soundPlayer){
         executorService = Executors.newScheduledThreadPool(1);
@@ -34,11 +37,17 @@ public class LoopPlayer {
     }
 
 
+    public void setLoopMultiplier(int value){
+        nextLoopMultiplier = (Math.max(1, value))/ 10f;
+    }
+
+
+
     public void play(){
         currentTime = 0;
         isPlaying.set(true);
         getView().ifPresent(LoopView::notifyLoopPlaying);
-        future = executorService.scheduleAtFixedRate(this::playNextSound, 0, loopRecorder.getTimeDivisor(), TimeUnit.MILLISECONDS);
+        future = executorService.scheduleAtFixedRate(this::playNextSound, 0, (long)(loopRecorder.getTimeDivisor() / loopMultiplier), TimeUnit.MILLISECONDS);
     }
 
 
@@ -100,8 +109,13 @@ public class LoopPlayer {
 
     private void updateCurrentTime(){
         currentTime++;
-        if(currentTime > loopRecorder.getDuration()){
+        if(currentTime > (loopRecorder.getDuration())){
             currentTime = 0;
+            if(loopMultiplier != nextLoopMultiplier){
+                stop();
+                loopMultiplier = nextLoopMultiplier;
+                play();
+            }
         }
     }
 }

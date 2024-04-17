@@ -47,7 +47,9 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         setupMusicButtons();
         setupRecordingButtons();
         setupMutedButtons();
+        setupTempoSeekBar();
     }
+
 
     private void loadSounds(){
         SoundFactory soundFactory = new SoundFactory();
@@ -58,7 +60,22 @@ public class MainActivity extends AppCompatActivity implements LoopView {
             sound.setButtonNumber(i);
             soundPlayer.loadSound(sound);
         }
-      //  soundBank.getSounds().forEach(soundPlayer::loadSound);
+    }
+
+
+    private void setupTempoSeekBar(){
+        SeekBar tempoSeekBar = findViewById(R.id.loopTempoSeekbar);
+        tempoSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {}
+
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                loopPlayer.setLoopMultiplier(seekBar.getProgress());
+            }
+        });
     }
 
 

@@ -5,4 +5,5 @@
     <string name="button_text_play">Play</string>
     <string name="button_text_clear">Clear</string>
     <string name="seekbar_loop_progress_label">Loop</string>
+    <string name="seekbar_loop_tempo_label">Tempo</string>
 </resources>

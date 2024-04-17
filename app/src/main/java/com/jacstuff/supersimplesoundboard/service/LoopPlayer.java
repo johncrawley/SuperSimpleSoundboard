@@ -1,5 +1,7 @@
 package com.jacstuff.supersimplesoundboard.service;
 
+import com.jacstuff.supersimplesoundboard.view.LoopView;
+
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -15,11 +17,17 @@ public class LoopPlayer {
     private ScheduledFuture<?> future;
     int currentTime = 0;
     private final AtomicBoolean isPlaying = new AtomicBoolean(false);
+    private LoopView loopView;
 
     public LoopPlayer(LoopRecorder loopRecorder, SoundPlayer soundPlayer){
         executorService = Executors.newScheduledThreadPool(1);
         this.loopRecorder = loopRecorder;
         this.soundPlayer = soundPlayer;
+    }
+
+
+    public void setLoopView(LoopView loopView){
+        this.loopView = loopView;
     }
 
 
@@ -38,10 +46,18 @@ public class LoopPlayer {
     }
 
 
+    private void updateLoopViewProgress(){
+        if(loopView != null){
+            loopView.notifyLoopProgress(currentTime);
+        }
+    }
+
+
     private void playNextSound(){
         Set<Integer> buttonNumbers = loopRecorder.getSoundsForTime(currentTime);
         buttonNumbers.forEach(soundPlayer::playSoundAtButton);
         updateCurrentTime();
+        updateLoopViewProgress();
     }
 
 

@@ -1,5 +1,7 @@
 package com.jacstuff.supersimplesoundboard.service;
 
+import com.jacstuff.supersimplesoundboard.view.LoopView;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,9 +17,17 @@ public class LoopRecorder {
     private int numberOfSoundsRecorded;
     private boolean isRecording;
     private final int timeDivisor = 20;
+    private LoopView loopView;
+    private boolean isInitialLoop = true;
+
 
     public LoopRecorder(){
         recordedSounds = new HashMap<>(100);
+    }
+
+
+    public void setLoopView(LoopView loopView){
+        this.loopView = loopView;
     }
 
 
@@ -69,12 +79,28 @@ public class LoopRecorder {
         isRecording = false;
         endTime = getCurrentTime();
         duration = endTime - startTime;
+        notifyViewOfEndTime();
+        isInitialLoop = false;
+    }
+
+
+    private void notifyViewOfEndTime(){
+        if(loopView != null){
+            if(isInitialLoop){
+                loopView.notifyEndTime(duration);
+            }
+            loopView.notifyLoopRecordingStopped();
+        }
     }
 
 
     public void clear(){
         numberOfSoundsRecorded = 0;
         recordedSounds.clear();
+        isInitialLoop = true;
+        if(loopView != null){
+            loopView.notifyLoopRecordingCleared();
+        }
     }
 
 

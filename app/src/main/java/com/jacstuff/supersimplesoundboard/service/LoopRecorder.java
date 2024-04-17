@@ -51,12 +51,14 @@ public class LoopRecorder {
             return;
         }
         isRecording = true;
-        startTime = getCurrentTime();
+        startTime = -1;
     }
+
 
     private long getCurrentTime(){
         return System.currentTimeMillis() / timeDivisor;
     }
+
 
     public void recordSound(int soundId){
         if(isRecording){
@@ -67,6 +69,10 @@ public class LoopRecorder {
 
 
     public long getCurrentTimeElapsed(){
+        if(startTime == -1){
+            startTime = getCurrentTime();
+            return 1;
+        }
         return getCurrentTime() - startTime;
     }
 

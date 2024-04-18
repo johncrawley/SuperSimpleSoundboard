@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements LoopView {
 
     private void loadSounds(){
         SoundFactory soundFactory = new SoundFactory();
-        soundBank = soundFactory.getSoundBank("n_bass");
+        soundBank = soundFactory.getSoundBank("Drums 1");
         List<Sound> sounds = soundBank.getSounds();
         for(int i=0; i< Math.min(8, sounds.size()); i++){
             Sound sound = sounds.get(i);
@@ -142,8 +142,6 @@ public class MainActivity extends AppCompatActivity implements LoopView {
             }
         });
     }
-
-
 
 
     private void setupMusicButtons(){

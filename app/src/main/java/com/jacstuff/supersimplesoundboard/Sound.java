@@ -15,14 +15,22 @@ public class Sound {
     }
 
 
+    public Sound(String name, String path){
+        this.name = name;
+        this.path = path;
+        this.octave = 0;
+    }
+
 
     public void setSoundPoolId(int soundPoolId){
         this.soundPoolId = soundPoolId;
     }
 
+
     public void setButtonNumber(int buttonNumber){
         this.buttonNumber = buttonNumber;
     }
+
 
     public int getButtonNumber(){
         return buttonNumber;

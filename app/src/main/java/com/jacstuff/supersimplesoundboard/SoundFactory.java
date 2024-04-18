@@ -1,6 +1,5 @@
 package com.jacstuff.supersimplesoundboard;
 
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,13 +10,43 @@ public class SoundFactory {
 
     public SoundFactory(){
         soundBanks = new HashMap<>(32);
+        createSoundNoteBanks();
         createSoundBanks();
     }
 
 
-    private void createSoundBanks(){
+    private void createSoundNoteBanks(){
         addSoundBank("volcanic", 8);
         addSoundBank("n_bass", 8);
+    }
+
+    private void createSoundBanks(){
+        addSoundBank("Drums 1", "drum_1", "Kick, Snare, Floor Tom, Low Tom, High Tom, Closed Hat, Open Hat, Crash, Ride, Splash, Cowbell");
+    }
+
+
+    private void addSoundBank(String bankName, String path, String soundNamesStr){
+        SoundBank soundBank = new SoundBank(bankName);
+        String[] names = soundNamesStr.split(",");
+        for(String soundName : names){
+            addTo(soundBank, path, soundName);
+        }
+        soundBanks.put(bankName, soundBank);
+    }
+
+
+    private void addTo(SoundBank soundBank, String dirName, String name){
+        String filename = name.toLowerCase().replaceAll(" ", "_");
+        String fullPath = createPath(dirName, filename, ".wav");
+        soundBank.add(new Sound(name, fullPath));
+    }
+
+
+    private String createPath(String dirName, String fileName, String extension){
+        return dirName
+                + File.separator
+                + fileName
+                + extension;
     }
 
 
@@ -32,7 +61,7 @@ public class SoundFactory {
 
 
     public SoundBank createSoundBank(String soundBankName, int numberOfOctaves){
-        SoundBank soundBank = new SoundBank("volcanic");
+        SoundBank soundBank = new SoundBank(soundBankName);
         for(int octave = 0; octave< numberOfOctaves; octave++){
             for(Note note : Note.values()){
                 String path = createPath(soundBankName, octave, note);

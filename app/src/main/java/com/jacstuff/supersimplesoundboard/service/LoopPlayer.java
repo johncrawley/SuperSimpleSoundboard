@@ -2,7 +2,6 @@ package com.jacstuff.supersimplesoundboard.service;
 
 import com.jacstuff.supersimplesoundboard.view.LoopView;
 
-
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -11,6 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 public class LoopPlayer {
 
     private final ScheduledExecutorService executorService;
@@ -42,7 +42,6 @@ public class LoopPlayer {
     }
 
 
-
     public void play(){
         currentTime = 0;
         isPlaying.set(true);
@@ -52,11 +51,13 @@ public class LoopPlayer {
 
 
     public void stop(){
-        if(isPlaying.get()){
-            future.cancel(false);
-            isPlaying.set(false);
-            getView().ifPresent(LoopView::notifyLoopStopped);
+        if(!isPlaying.get()) {
+            return;
         }
+        future.cancel(false);
+        isPlaying.set(false);
+        getView().ifPresent(LoopView::notifyLoopStopped);
+        updateLoopMultiplier();
     }
 
 
@@ -66,9 +67,7 @@ public class LoopPlayer {
 
 
     private void updateLoopViewProgress(){
-        if(loopView != null){
-            loopView.notifyLoopProgress(currentTime);
-        }
+        getView().ifPresent(v -> v.notifyLoopProgress(currentTime));
     }
 
 
@@ -111,11 +110,21 @@ public class LoopPlayer {
         currentTime++;
         if(currentTime > (loopRecorder.getDuration())){
             currentTime = 0;
-            if(loopMultiplier != nextLoopMultiplier){
-                stop();
-                loopMultiplier = nextLoopMultiplier;
-                play();
-            }
+            restartPlayIfLoopMultiplierChanged();
         }
     }
+
+
+    private void restartPlayIfLoopMultiplierChanged(){
+        if(loopMultiplier != nextLoopMultiplier){
+            stop();
+            play();
+        }
+    }
+
+
+    private void updateLoopMultiplier(){
+        loopMultiplier = nextLoopMultiplier;
+    }
+
 }

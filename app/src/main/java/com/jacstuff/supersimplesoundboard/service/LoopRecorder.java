@@ -3,7 +3,6 @@ package com.jacstuff.supersimplesoundboard.service;
 import com.jacstuff.supersimplesoundboard.view.LoopView;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,7 +21,7 @@ public class LoopRecorder {
     private long duration;
     private int numberOfSoundsRecorded;
     private boolean isRecording;
-    private final int timeDivisor = 20;
+    private final int timeDivisor = 80;
     private LoopView loopView;
     private boolean isInitialLoop = true;
     private int layerIndex;
@@ -64,7 +63,7 @@ public class LoopRecorder {
             return;
         }
         isRecording = true;
-        startTime = -1;
+        startTime = layerIndex == 0 ? -1 : getCurrentTime();
         currentLayer = new SoundLayer(layerIndex);
         getView().ifPresent(LoopView::notifyLoopRecordingStarted);
     }
@@ -89,7 +88,7 @@ public class LoopRecorder {
             startTime = getCurrentTime();
             return 1;
         }
-        return getCurrentTime() - startTime;
+        return 1 + getCurrentTime() - startTime;
     }
 
 

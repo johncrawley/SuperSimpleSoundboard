@@ -26,6 +26,9 @@ public class SoundPlayer {
 
 
     public void playSound(Sound sound){
+        if(sound == null){
+            return;
+        }
         soundPool.play(sound.getSoundPoolId(), 100,100, 1, 0,0.8f);
     }
 

@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -13,9 +14,11 @@ import android.widget.SeekBar;
 import com.google.android.material.button.MaterialButton;
 import com.jacstuff.supersimplesoundboard.service.LoopPlayer;
 import com.jacstuff.supersimplesoundboard.service.LoopRecorder;
+import com.jacstuff.supersimplesoundboard.service.SoundHolder;
 import com.jacstuff.supersimplesoundboard.service.SoundPlayer;
 import com.jacstuff.supersimplesoundboard.view.LoopView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -27,8 +30,9 @@ public class MainActivity extends AppCompatActivity implements LoopView {
     private SoundBank soundBank;
     private LoopRecorder loopRecorder;
     private LoopPlayer loopPlayer;
+    private List<SoundHolder> soundHolders;
     private SeekBar loopProgressSeekBar;
-    private ImageButton recordButton, stopButton, playButton, clearButton;
+    private ImageButton recordButton, playButton, clearButton;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -44,7 +48,9 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         loopPlayer = new LoopPlayer(loopRecorder, soundPlayer);
         loopPlayer.setLoopView(this);
         loadSounds();
-        setupMusicButtons();
+        // setupMusicButtons();
+        setupSoundHolders();
+        setupSoundButtons();
         setupRecordingButtons();
         setupMutedButtons();
         setupTempoSeekBar();
@@ -158,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements LoopView {
 
     private void setupRecordingButtons(){
         recordButton = setupButton(R.id.recordButton, ()-> loopRecorder.startRecording());
-        stopButton = setupButton(R.id.stopButton, ()-> {
+        setupButton(R.id.stopButton, ()-> {
             loopRecorder.stopRecording();
             loopPlayer.stop();
         });
@@ -186,6 +192,44 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         button.setOnClickListener(v -> {
             soundPlayer.playSound(sound);
             loopRecorder.recordSound(sound.getButtonNumber());
+        });
+    }
+
+    private void setupSoundButtons(){
+        int[] ids = new int[]{R.id.soundButton1,
+                R.id.soundButton2,
+                R.id.soundButton3,
+                R.id.soundButton4,
+                R.id.soundButton5,
+                R.id.soundButton6,
+                R.id.soundButton7,
+                R.id.soundButton8};
+        for(int i=0; i< ids.length; i++){
+            setupButton(ids[i], i);
+        }
+    }
+
+
+    private void setupSoundHolders(){
+        soundHolders = new ArrayList<>();
+        for(Sound sound : soundBank.getSounds()){
+            soundHolders.add(new SoundHolder(sound));
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void setupButton(int id, int index){
+        Button button = findViewById(id);
+        SoundHolder soundHolder = soundHolders.size() <= index ? null : soundHolders.get(index);
+        button.setPadding(-5,2,-5,2);
+        button.setOnClickListener(v -> {
+            if(soundHolder != null){
+                Sound sound = soundHolder.sound();
+                if(sound != null){
+                    soundPlayer.playSound(sound);
+                    loopRecorder.recordSound(sound.getButtonNumber());
+                }
+            }
         });
     }
 

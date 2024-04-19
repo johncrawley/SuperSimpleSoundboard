@@ -6,4 +6,12 @@
     <string name="button_text_clear">Clear</string>
     <string name="seekbar_loop_progress_label">Loop</string>
     <string name="seekbar_loop_tempo_label">Tempo</string>
+    <string name="sound_button_1">1</string>
+    <string name="sound_button_2">2</string>
+    <string name="sound_button_3">3</string>
+    <string name="sound_button_4">4</string>
+    <string name="sound_button_5">5</string>
+    <string name="sound_button_6">6</string>
+    <string name="sound_button_7">7</string>
+    <string name="sound_button_8">8</string>
 </resources>

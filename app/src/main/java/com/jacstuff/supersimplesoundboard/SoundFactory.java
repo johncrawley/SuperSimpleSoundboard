@@ -27,8 +27,7 @@ public class SoundFactory {
 
     private void addSoundBank(String bankName, String path, String soundNamesStr){
         SoundBank soundBank = new SoundBank(bankName);
-        String[] names = soundNamesStr.split(",");
-        for(String soundName : names){
+        for(String soundName : soundNamesStr.split(", ")){
             addTo(soundBank, path, soundName);
         }
         soundBanks.put(bankName, soundBank);

@@ -9,15 +9,86 @@
 
 
     <LinearLayout
+        tools:ignore="ButtonStyle"
         android:id="@+id/buttonLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
+        android:weightSum="4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/buttonLayoutRow2"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/soundButton1"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/sound_button_1"/>
+        <Button
+            android:id="@+id/soundButton2"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/sound_button_2"/>
+        <Button
+            android:id="@+id/soundButton3"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/sound_button_3"
+            />
+        <Button
+            android:id="@+id/soundButton4"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/sound_button_4"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        tools:ignore="ButtonStyle"
+        android:id="@+id/buttonLayoutRow2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:weightSum="4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonLayout"
         app:layout_constraintBottom_toTopOf="@id/buttonLayout2"
-        android:orientation="horizontal"/>
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/soundButton5"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/sound_button_5"/>
+        <Button
+            android:id="@+id/soundButton6"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/sound_button_6"/>
+        <Button
+            android:id="@+id/soundButton7"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/sound_button_7"
+            />
+        <Button
+            android:id="@+id/soundButton8"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/sound_button_8"/>
+
+    </LinearLayout>
 
 
     <LinearLayout

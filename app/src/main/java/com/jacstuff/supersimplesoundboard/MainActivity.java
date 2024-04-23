@@ -3,6 +3,8 @@ package com.jacstuff.supersimplesoundboard;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,7 @@ import com.jacstuff.supersimplesoundboard.service.LoopPlayer;
 import com.jacstuff.supersimplesoundboard.service.LoopRecorder;
 import com.jacstuff.supersimplesoundboard.service.SoundHolder;
 import com.jacstuff.supersimplesoundboard.service.SoundPlayer;
+import com.jacstuff.supersimplesoundboard.service.SoundSteps;
 import com.jacstuff.supersimplesoundboard.view.LoopView;
 
 import java.util.ArrayList;
@@ -33,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements LoopView {
     private List<SoundHolder> soundHolders;
     private SeekBar loopProgressSeekBar;
     private ImageButton recordButton, playButton, clearButton;
+    private final SoundSteps soundSteps = new SoundSteps(16);
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -54,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         setupRecordingButtons();
         setupMutedButtons();
         setupTempoSeekBar();
+        setupStepGridRow(R.id.stepRow2);
     }
 
 
@@ -195,6 +200,7 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         });
     }
 
+
     private void setupSoundButtons(){
         int[] ids = new int[]{R.id.soundButton1,
                 R.id.soundButton2,
@@ -209,6 +215,30 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         }
     }
 
+
+    private void setupStepGrid(){
+
+    }
+
+
+    private void setupStepGridRow(int rowId){
+        int numberOfSteps = 16;
+        Context context = MainActivity.this;
+        LinearLayout row2 = findViewById(rowId);
+        var params = new LinearLayout.LayoutParams(
+                0,
+                30,
+                1.0f);
+        params.setMargins(5,5,5,5);
+        for(int i = 0; i < numberOfSteps; i++){
+            View view = new View(context);
+            view.setLayoutParams(params);
+            view.setBackgroundColor(Color.BLUE);
+            view.setPadding(5,5,5,5);
+            row2.addView(view);
+        }
+
+    }
 
     private void setupSoundHolders(){
         soundHolders = new ArrayList<>();

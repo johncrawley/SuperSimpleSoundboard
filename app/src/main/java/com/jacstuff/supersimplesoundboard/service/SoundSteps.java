@@ -1,20 +1,36 @@
 package com.jacstuff.supersimplesoundboard.service;
 
+import com.jacstuff.supersimplesoundboard.Sound;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class SoundSteps {
-    private boolean[] steps;
+    private final List<Set<SoundHolder>> steps;
 
-    public SoundSteps(){
-        this.steps = new boolean[]{};
+    public SoundSteps(int numberOfSteps){
+        steps = new ArrayList<>();
+        for(int i=0; i < numberOfSteps; i++){
+            steps.add(new HashSet<>());
+        }
     }
 
 
-    public boolean isSelected(int index){
-        return steps[index];
+    public void toggleSelected(int index, SoundHolder soundHolder){
+        var step = steps.get(index);
+        if(step.contains(soundHolder)){
+            step.remove(soundHolder);
+        }else{
+            step.add(soundHolder);
+        }
     }
 
 
-    public void toggleSelected(int index){
-        steps[index] = !steps[index];
+    public List<Sound> getSoundsForStep(int index){
+        return steps.get(index).stream().map(SoundHolder::sound).collect(Collectors.toList());
     }
 
 

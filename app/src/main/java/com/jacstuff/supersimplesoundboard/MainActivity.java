@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements LoopView {
     private SeekBar loopProgressSeekBar;
     private ImageButton recordButton, playButton, clearButton;
     private final SoundSteps soundSteps = new SoundSteps(16);
+    private LinearLayout stepLayout;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -58,7 +59,8 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         setupRecordingButtons();
         setupMutedButtons();
         setupTempoSeekBar();
-        setupStepGridRow(R.id.stepRow2);
+        setupStepGrid();
+
     }
 
 
@@ -217,28 +219,45 @@ public class MainActivity extends AppCompatActivity implements LoopView {
 
 
     private void setupStepGrid(){
-
+        stepLayout = findViewById(R.id.stepLayout);
+        int numberOfSounds = 8;
+        for(int i = 0; i < numberOfSounds; i++){
+            setupStepGridRow(i);
+        }
     }
 
 
     private void setupStepGridRow(int rowId){
+        LinearLayout stepRow = new LinearLayout(getApplicationContext());
         int numberOfSteps = 16;
-        Context context = MainActivity.this;
-        LinearLayout row2 = findViewById(rowId);
+        for(int i = 0; i < numberOfSteps; i++){
+            createStepFor(stepRow, rowId, i);
+        }
+        stepLayout.addView(stepRow);
+    }
+
+
+    private void createStepFor(ViewGroup row, int rowId, int stepIndex){
         var params = new LinearLayout.LayoutParams(
                 0,
                 30,
                 1.0f);
         params.setMargins(5,5,5,5);
-        for(int i = 0; i < numberOfSteps; i++){
-            View view = new View(context);
-            view.setLayoutParams(params);
-            view.setBackgroundColor(Color.BLUE);
-            view.setPadding(5,5,5,5);
-            row2.addView(view);
-        }
-
+        View view = new View(getApplicationContext());
+        view.setLayoutParams(params);
+        view.setBackgroundColor(Color.DKGRAY);
+        view.setPadding(5,5,5,5);
+        view.setOnClickListener(v -> onStepClick(v, rowId, stepIndex));
+        row.addView(view);
     }
+
+
+    private void onStepClick(View v, int rowId, int stepIndex){
+        soundSteps.toggleSelected(stepIndex, soundHolders.get(rowId));
+        v.setSelected(!v.isSelected());
+        v.setBackgroundColor(v.isSelected() ? Color.CYAN : Color.DKGRAY);
+    }
+
 
     private void setupSoundHolders(){
         soundHolders = new ArrayList<>();

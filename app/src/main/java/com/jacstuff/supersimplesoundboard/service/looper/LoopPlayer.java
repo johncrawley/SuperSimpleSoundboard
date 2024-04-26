@@ -1,5 +1,7 @@
-package com.jacstuff.supersimplesoundboard.service;
+package com.jacstuff.supersimplesoundboard.service.looper;
 
+import com.jacstuff.supersimplesoundboard.service.RecordedSounds;
+import com.jacstuff.supersimplesoundboard.service.SoundPlayer;
 import com.jacstuff.supersimplesoundboard.view.LoopView;
 
 import java.util.HashSet;

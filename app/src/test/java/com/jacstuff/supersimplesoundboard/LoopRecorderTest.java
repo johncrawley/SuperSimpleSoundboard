@@ -2,7 +2,7 @@ package com.jacstuff.supersimplesoundboard;
 
 import static org.junit.Assert.assertEquals;
 
-import com.jacstuff.supersimplesoundboard.service.LoopRecorder;
+import com.jacstuff.supersimplesoundboard.service.looper.LoopRecorder;
 
 import org.junit.Before;
 import org.junit.Test;

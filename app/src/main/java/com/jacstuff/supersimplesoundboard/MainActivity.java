@@ -3,7 +3,6 @@ package com.jacstuff.supersimplesoundboard;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -12,13 +11,15 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.google.android.material.button.MaterialButton;
-import com.jacstuff.supersimplesoundboard.service.LoopPlayer;
-import com.jacstuff.supersimplesoundboard.service.LoopRecorder;
+import com.jacstuff.supersimplesoundboard.service.looper.LoopPlayer;
+import com.jacstuff.supersimplesoundboard.service.looper.LoopRecorder;
 import com.jacstuff.supersimplesoundboard.service.SoundHolder;
 import com.jacstuff.supersimplesoundboard.service.SoundPlayer;
-import com.jacstuff.supersimplesoundboard.service.SoundSteps;
+import com.jacstuff.supersimplesoundboard.service.steps.SoundSteps;
+import com.jacstuff.supersimplesoundboard.service.steps.StepPlayer;
 import com.jacstuff.supersimplesoundboard.view.LoopView;
 
 import java.util.ArrayList;
@@ -38,6 +39,9 @@ public class MainActivity extends AppCompatActivity implements LoopView {
     private ImageButton recordButton, playButton, clearButton;
     private final SoundSteps soundSteps = new SoundSteps(16);
     private LinearLayout stepLayout;
+    private StepPlayer stepPlayer;
+    private SeekBar bpmSeekBar;
+    private TextView currentBpmText;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -53,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         loopPlayer = new LoopPlayer(loopRecorder, soundPlayer);
         loopPlayer.setLoopView(this);
         loadSounds();
+        stepPlayer = new StepPlayer(soundSteps, soundPlayer, 70);
         // setupMusicButtons();
         setupSoundHolders();
         setupSoundButtons();
@@ -60,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         setupMutedButtons();
         setupTempoSeekBar();
         setupStepGrid();
+        setupBpmSeekbar();
 
     }
 
@@ -170,13 +176,19 @@ public class MainActivity extends AppCompatActivity implements LoopView {
 
 
     private void setupRecordingButtons(){
+        /*
         recordButton = setupButton(R.id.recordButton, ()-> loopRecorder.startRecording());
         setupButton(R.id.stopButton, ()-> {
             loopRecorder.stopRecording();
             loopPlayer.stop();
         });
-       playButton =  setupButton(R.id.playButton, ()-> loopPlayer.play());
-       clearButton = setupButton(R.id.clearButton, ()-> loopRecorder.clear());
+        playButton =  setupButton(R.id.playButton, ()-> loopPlayer.play());
+        clearButton = setupButton(R.id.clearButton, ()-> loopRecorder.clear());
+
+         */
+
+        playButton =  setupButton(R.id.playButton, ()-> stepPlayer.play());
+        setupButton(R.id.stopButton, ()-> stepPlayer.stopAndReset());
     }
 
 
@@ -184,6 +196,29 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         ImageButton button = findViewById(id);
         button.setOnClickListener(v -> runnable.run());
         return button;
+    }
+
+
+    private void setupBpmSeekbar(){
+        bpmSeekBar = findViewById(R.id.bpmSeekbar);
+        currentBpmText = findViewById(R.id.currentBpmText);
+        bpmSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar seekBar, int i, boolean b) {}
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                int bpm = seekBar.getProgress();
+                stepPlayer.setBpm(bpm);
+                setCurrentBpmText(bpm);
+            }
+        });
+    }
+
+
+    private void setCurrentBpmText(int bpm){
+        String bpmStr = bpm + "bpm";
+        currentBpmText.setText(bpmStr);
     }
 
 
@@ -265,6 +300,7 @@ public class MainActivity extends AppCompatActivity implements LoopView {
             soundHolders.add(new SoundHolder(sound));
         }
     }
+
 
     @SuppressLint("ClickableViewAccessibility")
     private void setupButton(int id, int index){

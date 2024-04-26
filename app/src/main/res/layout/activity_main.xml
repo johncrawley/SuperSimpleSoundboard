@@ -59,7 +59,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonLayout"
-        app:layout_constraintBottom_toTopOf="@id/buttonLayout2"
+        app:layout_constraintBottom_toTopOf="@id/stepLayout"
         android:orientation="horizontal">
 
         <Button
@@ -92,25 +92,59 @@
 
 
     <LinearLayout
-        android:id="@+id/buttonLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
+        android:id="@+id/bpmLayout"
+        android:orientation="horizontal"
+        android:weightSum="10"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/buttonLayout"
-        app:layout_constraintBottom_toTopOf="@id/loopTempoLayout"
-        android:orientation="horizontal"/>
+        app:layout_constraintTop_toBottomOf="@id/buttonLayoutRow2"
+        app:layout_constraintBottom_toTopOf="@id/stepLayout">
 
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:layout_height="match_parent"
+            android:text="@string/seekbar_loop_tempo_label" />
+
+        <LinearLayout
+            android:layout_weight="8"
+            android:layout_width="0dp"
+            android:gravity="center"
+            android:layout_marginHorizontal="12dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="72bpm"
+                android:id="@+id/currentBpmText"
+                />
+
+            <SeekBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:progress="72"
+                android:min="45"
+                android:max="220"
+                android:id="@+id/bpmSeekbar"/>
+        </LinearLayout>
+
+    </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/loopTempoLayout"
         android:orientation="horizontal"
         android:weightSum="10"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/buttonLayout2"
+        app:layout_constraintTop_toBottomOf="@id/bpmLayout"
         app:layout_constraintBottom_toTopOf="@id/stepLayout">
 
         <TextView
@@ -160,6 +194,7 @@
         android:id="@+id/loopProgressLayout"
         android:orientation="horizontal"
         android:weightSum="10"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/stepLayout"
@@ -209,6 +244,7 @@
             android:id="@+id/recordButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             app:srcCompat="@drawable/baseline_fiber_manual_record_24"/>
         <ImageButton
             android:id="@+id/stopButton"
@@ -233,6 +269,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:visibility="gone"
         android:layout_marginHorizontal="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

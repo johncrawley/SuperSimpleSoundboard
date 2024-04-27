@@ -21,12 +21,13 @@ import com.jacstuff.supersimplesoundboard.service.SoundPlayer;
 import com.jacstuff.supersimplesoundboard.service.steps.SoundSteps;
 import com.jacstuff.supersimplesoundboard.service.steps.StepPlayer;
 import com.jacstuff.supersimplesoundboard.view.LoopView;
+import com.jacstuff.supersimplesoundboard.view.StepGridView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity implements LoopView {
+public class MainActivity extends AppCompatActivity implements LoopView, StepGridView {
 
     private LinearLayout buttonLayout;
     private LinearLayout.LayoutParams buttonParams;
@@ -43,6 +44,10 @@ public class MainActivity extends AppCompatActivity implements LoopView {
     private SeekBar bpmSeekBar;
     private TextView currentBpmText;
 
+    private View currentlySelectedProgressView;
+    private ViewGroup progressLayout;
+    private final int unselectedProgressColor = Color.DKGRAY;
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         loopPlayer.setLoopView(this);
         loadSounds();
         stepPlayer = new StepPlayer(soundSteps, soundPlayer, 70);
+        stepPlayer.setView(MainActivity.this);
         // setupMusicButtons();
         setupSoundHolders();
         setupSoundButtons();
@@ -203,7 +209,9 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         bpmSeekBar = findViewById(R.id.bpmSeekbar);
         currentBpmText = findViewById(R.id.currentBpmText);
         bpmSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override public void onProgressChanged(SeekBar seekBar, int i, boolean b) {}
+            @Override public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                setCurrentBpmText(i);
+            }
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
 
             @Override
@@ -259,6 +267,7 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         for(int i = 0; i < numberOfSounds; i++){
             setupStepGridRow(i);
         }
+        setupProgressRow();
     }
 
 
@@ -286,11 +295,55 @@ public class MainActivity extends AppCompatActivity implements LoopView {
         row.addView(view);
     }
 
+    private void addProgressStepTo(ViewGroup row, int stepIndex){
+        var params = new LinearLayout.LayoutParams(
+                0,
+                5,
+                1.0f);
+        params.setMargins(5,5,5,5);
+        View view = new View(getApplicationContext());
+        view.setLayoutParams(params);
+        view.setBackgroundColor(unselectedProgressColor);
+        view.setPadding(5,5,5,5);
+        row.addView(view);
+    }
+
 
     private void onStepClick(View v, int rowId, int stepIndex){
         soundSteps.toggleSelected(stepIndex, soundHolders.get(rowId));
         v.setSelected(!v.isSelected());
         v.setBackgroundColor(v.isSelected() ? Color.CYAN : Color.DKGRAY);
+    }
+
+
+    private void setupProgressRow(){
+        progressLayout = new LinearLayout(getApplicationContext());
+        int numberOfSteps = 16;
+        for(int i = 0; i < numberOfSteps; i++){
+            addProgressStepTo(progressLayout, i);
+        }
+        stepLayout.addView(progressLayout);
+    }
+
+
+    public void hideProgress(){
+        resetCurrentProgressView();
+    }
+
+
+    public void setCurrentProgress(int index){
+        resetCurrentProgressView();
+        var view = progressLayout.getChildAt(index);
+        view.setBackgroundColor(Color.YELLOW);
+        currentlySelectedProgressView = view;
+
+    }
+
+
+    private void resetCurrentProgressView(){
+        if(currentlySelectedProgressView != null){
+            currentlySelectedProgressView.setBackgroundColor(unselectedProgressColor);
+        }
     }
 
 

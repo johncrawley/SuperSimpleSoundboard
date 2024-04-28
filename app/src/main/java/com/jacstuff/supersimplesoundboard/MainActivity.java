@@ -13,35 +13,24 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.google.android.material.button.MaterialButton;
-import com.jacstuff.supersimplesoundboard.service.looper.LoopPlayer;
-import com.jacstuff.supersimplesoundboard.service.looper.LoopRecorder;
 import com.jacstuff.supersimplesoundboard.service.SoundHolder;
 import com.jacstuff.supersimplesoundboard.service.SoundPlayer;
 import com.jacstuff.supersimplesoundboard.service.steps.SoundSteps;
 import com.jacstuff.supersimplesoundboard.service.steps.StepPlayer;
-import com.jacstuff.supersimplesoundboard.view.LoopView;
 import com.jacstuff.supersimplesoundboard.view.StepGridView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity implements LoopView, StepGridView {
+public class MainActivity extends AppCompatActivity implements StepGridView {
 
-    private LinearLayout buttonLayout;
-    private LinearLayout.LayoutParams buttonParams;
     private SoundPlayer soundPlayer;
     private SoundBank soundBank;
-    private LoopRecorder loopRecorder;
-    private LoopPlayer loopPlayer;
     private List<SoundHolder> soundHolders;
-    private SeekBar loopProgressSeekBar;
-    private ImageButton recordButton, playButton, clearButton;
     private final SoundSteps soundSteps = new SoundSteps(16);
     private LinearLayout stepLayout;
     private StepPlayer stepPlayer;
-    private SeekBar bpmSeekBar;
     private TextView currentBpmText;
 
     private View currentlySelectedProgressView;
@@ -53,23 +42,14 @@ public class MainActivity extends AppCompatActivity implements LoopView, StepGri
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        buttonLayout = findViewById(R.id.buttonLayout);
-        loopProgressSeekBar = findViewById(R.id.loopProgressSeekbar);
         assignButtonLayout();
         soundPlayer = new SoundPlayer(getApplicationContext());
-        loopRecorder = new LoopRecorder();
-        loopRecorder.setLoopView(this);
-        loopPlayer = new LoopPlayer(loopRecorder, soundPlayer);
-        loopPlayer.setLoopView(this);
         loadSounds();
         stepPlayer = new StepPlayer(soundSteps, soundPlayer, 70);
         stepPlayer.setView(MainActivity.this);
-        // setupMusicButtons();
         setupSoundHolders();
         setupSoundButtons();
         setupRecordingButtons();
-        setupMutedButtons();
-        setupTempoSeekBar();
         setupStepGrid();
         setupBpmSeekbar();
 
@@ -80,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements LoopView, StepGri
         SoundFactory soundFactory = new SoundFactory();
         soundBank = soundFactory.getSoundBank("Drums 1");
         List<Sound> sounds = soundBank.getSounds();
-        for(int i=0; i< Math.min(8, sounds.size()); i++){
+        for(int i = 0; i < Math.min(8, sounds.size()); i++){
             Sound sound = sounds.get(i);
             sound.setButtonNumber(i);
             soundPlayer.loadSound(sound);
@@ -88,125 +68,20 @@ public class MainActivity extends AppCompatActivity implements LoopView, StepGri
     }
 
 
-    private void setupTempoSeekBar(){
-        SeekBar tempoSeekBar = findViewById(R.id.loopTempoSeekbar);
-        tempoSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {}
-
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                loopPlayer.setLoopMultiplier(seekBar.getProgress());
-            }
-        });
-    }
-
-
-    @Override
-    public void notifyEndTime(long endTime){
-        log("Entered notifyEndTime() endTime: " + endTime);
-        loopProgressSeekBar.setMax((int)endTime);
-    }
-
-
-    @Override
-    public void notifyLoopRecordingStopped(){
-        setEnabled(true, recordButton, playButton, clearButton);
-    }
-
-
-    @Override
-    public void notifyLoopRecordingStarted(){
-        setEnabled(false, recordButton, playButton, clearButton);
-    }
-
-
-    @Override
-    public void notifyLoopPlaying(){
-        setEnabled(false, recordButton, playButton, clearButton);
-    }
-
-
-    @Override
-    public void notifyLoopRecordingCleared(){
-        loopProgressSeekBar.setProgress(0);
-        loopProgressSeekBar.setMax(1);
-        setEnabled(false, playButton, clearButton);
-    }
-
-
-    @Override
-    public void notifyLoopProgress(int progress){
-        runOnUiThread(()-> loopProgressSeekBar.setProgress(progress));
-    }
-
-
-    @Override
-    public void notifyLoopStopped(){
-        runOnUiThread(()->loopProgressSeekBar.setProgress(0));
-        setEnabled(true, playButton, recordButton, clearButton);
-    }
-
-
-    public void setupMutedButtons(){
-        setupButton(R.id.muteLayer0Button, ()-> loopPlayer.toggleMuted(0));
-        setupButton(R.id.muteLayer1Button, ()-> loopPlayer.toggleMuted(1));
-        setupButton(R.id.muteLayer2Button, ()-> loopPlayer.toggleMuted(2));
-        setupButton(R.id.muteLayer3Button, ()-> loopPlayer.toggleMuted(3));
-        setupButton(R.id.muteLayer4Button, ()-> loopPlayer.toggleMuted(4));
-    }
-
-
-    private void setEnabled(boolean isEnabled, ImageButton... buttons){
-        log("Entered setVisibility()");
-        runOnUiThread(()->{
-            for(ImageButton button : buttons){
-                button.setEnabled(isEnabled);
-            }
-        });
-    }
-
-
-    private void setupMusicButtons(){
-        int buttonNumber = 0;
-        for(Sound sound : soundBank.getSounds()){
-            sound.setButtonNumber(buttonNumber);
-            setupButton(sound);
-            if(buttonNumber++ > 7){
-                break;
-            }
-        }
-    }
-
-
     private void setupRecordingButtons(){
-        /*
-        recordButton = setupButton(R.id.recordButton, ()-> loopRecorder.startRecording());
-        setupButton(R.id.stopButton, ()-> {
-            loopRecorder.stopRecording();
-            loopPlayer.stop();
-        });
-        playButton =  setupButton(R.id.playButton, ()-> loopPlayer.play());
-        clearButton = setupButton(R.id.clearButton, ()-> loopRecorder.clear());
-
-         */
-
-        playButton =  setupButton(R.id.playButton, ()-> stepPlayer.play());
+        setupButton(R.id.playButton, ()-> stepPlayer.play());
         setupButton(R.id.stopButton, ()-> stepPlayer.stopAndReset());
     }
 
 
-    private ImageButton setupButton(int id, Runnable runnable){
+    private void setupButton(int id, Runnable runnable){
         ImageButton button = findViewById(id);
         button.setOnClickListener(v -> runnable.run());
-        return button;
     }
 
 
     private void setupBpmSeekbar(){
-        bpmSeekBar = findViewById(R.id.bpmSeekbar);
+        SeekBar bpmSeekBar = findViewById(R.id.bpmSeekbar);
         currentBpmText = findViewById(R.id.currentBpmText);
         bpmSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -227,22 +102,6 @@ public class MainActivity extends AppCompatActivity implements LoopView, StepGri
     private void setCurrentBpmText(int bpm){
         String bpmStr = bpm + "bpm";
         currentBpmText.setText(bpmStr);
-    }
-
-
-    @SuppressLint("ClickableViewAccessibility")
-    private void setupButton(Sound sound){
-        MaterialButton button = new MaterialButton(this);
-        button.setPadding(0,2,0,2);
-        button.setLayoutParams(buttonParams);
-        button.setText(sound.getDisplayName());
-        button.setId(View.generateViewId());
-        button.setTag(sound.getSoundPoolId());
-        buttonLayout.addView(button);
-        button.setOnClickListener(v -> {
-            soundPlayer.playSound(sound);
-            loopRecorder.recordSound(sound.getButtonNumber());
-        });
     }
 
 
@@ -295,19 +154,6 @@ public class MainActivity extends AppCompatActivity implements LoopView, StepGri
         row.addView(view);
     }
 
-    private void addProgressStepTo(ViewGroup row, int stepIndex){
-        var params = new LinearLayout.LayoutParams(
-                0,
-                5,
-                1.0f);
-        params.setMargins(5,5,5,5);
-        View view = new View(getApplicationContext());
-        view.setLayoutParams(params);
-        view.setBackgroundColor(unselectedProgressColor);
-        view.setPadding(5,5,5,5);
-        row.addView(view);
-    }
-
 
     private void onStepClick(View v, int rowId, int stepIndex){
         soundSteps.toggleSelected(stepIndex, soundHolders.get(rowId));
@@ -320,9 +166,20 @@ public class MainActivity extends AppCompatActivity implements LoopView, StepGri
         progressLayout = new LinearLayout(getApplicationContext());
         int numberOfSteps = 16;
         for(int i = 0; i < numberOfSteps; i++){
-            addProgressStepTo(progressLayout, i);
+            addProgressStepTo(progressLayout);
         }
         stepLayout.addView(progressLayout);
+    }
+
+
+    private void addProgressStepTo(ViewGroup row){
+        var params = new LinearLayout.LayoutParams(0, 5, 1.0f);
+        params.setMargins(5,5,5,5);
+        View view = new View(getApplicationContext());
+        view.setLayoutParams(params);
+        view.setBackgroundColor(unselectedProgressColor);
+        view.setPadding(5,5,5,5);
+        row.addView(view);
     }
 
 
@@ -365,7 +222,6 @@ public class MainActivity extends AppCompatActivity implements LoopView, StepGri
                 Sound sound = soundHolder.sound();
                 if(sound != null){
                     soundPlayer.playSound(sound);
-                    loopRecorder.recordSound(sound.getButtonNumber());
                 }
             }
         });
@@ -373,16 +229,10 @@ public class MainActivity extends AppCompatActivity implements LoopView, StepGri
 
 
     private void assignButtonLayout(){
-        buttonParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+        LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 100);
         buttonParams.setMargins(4,4,4,4);
     }
-
-
-    private void log(String msg){
-        System.out.println("^^^ MainActivity: "  + msg);
-    }
-
 
 
 }

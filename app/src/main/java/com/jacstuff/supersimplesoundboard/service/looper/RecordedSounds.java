@@ -1,4 +1,4 @@
-package com.jacstuff.supersimplesoundboard.service;
+package com.jacstuff.supersimplesoundboard.service.looper;
 
 import java.util.Set;
 

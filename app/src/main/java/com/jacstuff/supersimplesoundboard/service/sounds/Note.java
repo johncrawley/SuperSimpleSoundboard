@@ -1,4 +1,4 @@
-package com.jacstuff.supersimplesoundboard;
+package com.jacstuff.supersimplesoundboard.service.sounds;
 
 public enum Note {
 

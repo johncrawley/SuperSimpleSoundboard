@@ -5,7 +5,7 @@ import android.content.res.AssetFileDescriptor;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
 
-import com.jacstuff.supersimplesoundboard.Sound;
+import com.jacstuff.supersimplesoundboard.service.sounds.Sound;
 
 import java.io.IOException;
 import java.util.HashMap;

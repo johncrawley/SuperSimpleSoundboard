@@ -3,8 +3,12 @@ package com.jacstuff.supersimplesoundboard;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -13,29 +17,41 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.jacstuff.supersimplesoundboard.service.SoundHolder;
-import com.jacstuff.supersimplesoundboard.service.SoundPlayer;
-import com.jacstuff.supersimplesoundboard.service.steps.SoundSteps;
-import com.jacstuff.supersimplesoundboard.service.steps.StepPlayer;
-import com.jacstuff.supersimplesoundboard.view.StepGridView;
+import com.jacstuff.supersimplesoundboard.service.SoundBoardServiceImpl;
+import com.jacstuff.supersimplesoundboard.service.steps.SoundBoardService;
+import com.jacstuff.supersimplesoundboard.view.MainView;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
-public class MainActivity extends AppCompatActivity implements StepGridView {
+public class MainActivity extends AppCompatActivity implements MainView {
 
-    private SoundPlayer soundPlayer;
-    private SoundBank soundBank;
-    private List<SoundHolder> soundHolders;
-    private final SoundSteps soundSteps = new SoundSteps(16);
     private LinearLayout stepLayout;
-    private StepPlayer stepPlayer;
     private TextView currentBpmText;
 
+    private SeekBar bpmSeekBar;
     private View currentlySelectedProgressView;
     private ViewGroup progressLayout;
     private final int unselectedProgressColor = Color.DKGRAY;
+    private SoundBoardServiceImpl soundboardService;
+    private final AtomicBoolean isServiceConnected = new AtomicBoolean();
+
+
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            SoundBoardServiceImpl.LocalBinder binder = (SoundBoardServiceImpl.LocalBinder) service;
+            soundboardService = binder.getService();
+            soundboardService.setView(MainActivity.this);
+            isServiceConnected.set(true);
+        }
+
+        @Override public void onServiceDisconnected(ComponentName arg0) {
+            isServiceConnected.set(false);
+        }
+    };
+
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -43,34 +59,30 @@ public class MainActivity extends AppCompatActivity implements StepGridView {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         assignButtonLayout();
-        soundPlayer = new SoundPlayer(getApplicationContext());
-        loadSounds();
-        stepPlayer = new StepPlayer(soundSteps, soundPlayer, 70);
-        stepPlayer.setView(MainActivity.this);
-        setupSoundHolders();
+        startService();
         setupSoundButtons();
-        setupRecordingButtons();
+        setupPlaybackButtons();
         setupStepGrid();
         setupBpmSeekbar();
-
     }
 
 
-    private void loadSounds(){
-        SoundFactory soundFactory = new SoundFactory();
-        soundBank = soundFactory.getSoundBank("Drums 1");
-        List<Sound> sounds = soundBank.getSounds();
-        for(int i = 0; i < Math.min(8, sounds.size()); i++){
-            Sound sound = sounds.get(i);
-            sound.setButtonNumber(i);
-            soundPlayer.loadSound(sound);
-        }
+    private void startService(){
+        Intent mediaPlayerServiceIntent = new Intent(this, SoundBoardServiceImpl.class);
+        getApplicationContext().startService(mediaPlayerServiceIntent);
+        getApplicationContext().bindService(mediaPlayerServiceIntent, serviceConnection, 0);
     }
 
 
-    private void setupRecordingButtons(){
-        setupButton(R.id.playButton, ()-> stepPlayer.play());
-        setupButton(R.id.stopButton, ()-> stepPlayer.stopAndReset());
+
+    private void setupPlaybackButtons(){
+        setupButton(R.id.playButton, ()-> getService().ifPresent(SoundBoardService::play));
+        setupButton(R.id.stopButton, ()-> getService().ifPresent(SoundBoardService::stopAndReset));
+    }
+
+
+    private Optional<SoundBoardServiceImpl> getService(){
+        return Optional.ofNullable(soundboardService);
     }
 
 
@@ -80,8 +92,27 @@ public class MainActivity extends AppCompatActivity implements StepGridView {
     }
 
 
+    @Override
+    public void setStep(int index, boolean... areStepsEnabled){
+        if(index >= stepLayout.getChildCount()){
+            return;
+        }
+        ViewGroup row = (ViewGroup) stepLayout.getChildAt(index);
+        for(int i = 0; i < Math.min(areStepsEnabled.length, row.getChildCount()); i++){
+            updateStepView(row.getChildAt(i), areStepsEnabled[i]);
+        }
+    }
+
+
+    @Override
+    public void setBpmProgress(int progress){
+        setCurrentBpmText(progress);
+        bpmSeekBar.setProgress(progress);
+    }
+
+
     private void setupBpmSeekbar(){
-        SeekBar bpmSeekBar = findViewById(R.id.bpmSeekbar);
+        bpmSeekBar = findViewById(R.id.bpmSeekbar);
         currentBpmText = findViewById(R.id.currentBpmText);
         bpmSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -92,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements StepGridView {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 int bpm = seekBar.getProgress();
-                stepPlayer.setBpm(bpm);
+                getService().ifPresent(sbs -> sbs.setBpm(bpm));
                 setCurrentBpmText(bpm);
             }
         });
@@ -156,8 +187,13 @@ public class MainActivity extends AppCompatActivity implements StepGridView {
 
 
     private void onStepClick(View v, int rowId, int stepIndex){
-        soundSteps.toggleSelected(stepIndex, soundHolders.get(rowId));
-        v.setSelected(!v.isSelected());
+        soundboardService.toggleStep(stepIndex, rowId);
+        updateStepView(v, !v.isSelected());
+    }
+
+
+    private void updateStepView(View v, boolean isSelected){
+        v.setSelected(isSelected);
         v.setBackgroundColor(v.isSelected() ? Color.CYAN : Color.DKGRAY);
     }
 
@@ -183,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements StepGridView {
     }
 
 
-    public void hideProgress(){
+    public void hideStepProgress(){
         resetCurrentProgressView();
     }
 
@@ -196,6 +232,11 @@ public class MainActivity extends AppCompatActivity implements StepGridView {
 
     }
 
+    @Override
+    public void setNumberOfSteps(int numberOfSteps) {
+
+    }
+
 
     private void resetCurrentProgressView(){
         if(currentlySelectedProgressView != null){
@@ -204,27 +245,11 @@ public class MainActivity extends AppCompatActivity implements StepGridView {
     }
 
 
-    private void setupSoundHolders(){
-        soundHolders = new ArrayList<>();
-        for(Sound sound : soundBank.getSounds()){
-            soundHolders.add(new SoundHolder(sound));
-        }
-    }
-
-
     @SuppressLint("ClickableViewAccessibility")
     private void setupButton(int id, int index){
         Button button = findViewById(id);
-        SoundHolder soundHolder = soundHolders.size() <= index ? null : soundHolders.get(index);
         button.setPadding(-5,2,-5,2);
-        button.setOnClickListener(v -> {
-            if(soundHolder != null){
-                Sound sound = soundHolder.sound();
-                if(sound != null){
-                    soundPlayer.playSound(sound);
-                }
-            }
-        });
+        button.setOnClickListener(v -> soundboardService.playSoundAtIndex(index));
     }
 
 

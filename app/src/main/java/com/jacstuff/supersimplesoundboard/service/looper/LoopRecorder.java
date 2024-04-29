@@ -1,7 +1,5 @@
 package com.jacstuff.supersimplesoundboard.service.looper;
 
-import com.jacstuff.supersimplesoundboard.service.RecordedSounds;
-import com.jacstuff.supersimplesoundboard.service.SoundLayer;
 import com.jacstuff.supersimplesoundboard.view.LoopView;
 
 import java.util.ArrayList;

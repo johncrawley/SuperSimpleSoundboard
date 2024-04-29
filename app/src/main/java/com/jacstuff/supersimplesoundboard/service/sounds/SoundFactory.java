@@ -1,4 +1,4 @@
-package com.jacstuff.supersimplesoundboard;
+package com.jacstuff.supersimplesoundboard.service.sounds;
 
 import java.io.File;
 import java.util.HashMap;

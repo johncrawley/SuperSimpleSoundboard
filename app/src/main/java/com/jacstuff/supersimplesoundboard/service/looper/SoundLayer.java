@@ -1,4 +1,6 @@
-package com.jacstuff.supersimplesoundboard.service;
+package com.jacstuff.supersimplesoundboard.service.looper;
+
+import com.jacstuff.supersimplesoundboard.service.looper.RecordedSounds;
 
 import java.util.Collections;
 import java.util.HashMap;

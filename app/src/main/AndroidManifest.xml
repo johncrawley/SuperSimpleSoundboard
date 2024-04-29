@@ -23,7 +23,7 @@
 
 
         <service
-            android:name=".service.SoundBoardService"
+            android:name=".service.SoundBoardServiceImpl"
             android:label="SoundBoardService"
             android:enabled="true"
             android:stopWithTask="true" />

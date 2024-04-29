@@ -1,6 +1,6 @@
 package com.jacstuff.supersimplesoundboard.service.steps;
 
-import com.jacstuff.supersimplesoundboard.Sound;
+import com.jacstuff.supersimplesoundboard.service.sounds.Sound;
 import com.jacstuff.supersimplesoundboard.service.SoundHolder;
 
 import java.util.ArrayList;

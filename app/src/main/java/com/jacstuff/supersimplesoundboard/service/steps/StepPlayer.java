@@ -1,8 +1,8 @@
 package com.jacstuff.supersimplesoundboard.service.steps;
 
-import com.jacstuff.supersimplesoundboard.Sound;
+import com.jacstuff.supersimplesoundboard.service.sounds.Sound;
 import com.jacstuff.supersimplesoundboard.service.SoundPlayer;
-import com.jacstuff.supersimplesoundboard.view.StepGridView;
+import com.jacstuff.supersimplesoundboard.view.MainView;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -19,7 +19,7 @@ public class StepPlayer {
     private int currentStepIndex;
     private int bpm;
     private final AtomicBoolean isPlaying = new AtomicBoolean();
-    private StepGridView view;
+    private MainView view;
 
     public StepPlayer(SoundSteps soundSteps, SoundPlayer soundPlayer, int initialBpm){
         this.soundSteps = soundSteps;
@@ -36,7 +36,7 @@ public class StepPlayer {
     }
 
 
-    public void setView(StepGridView view){
+    public void setView(MainView view){
         this.view = view;
     }
 
@@ -66,7 +66,7 @@ public class StepPlayer {
         if(future != null && !future.isCancelled()){
             future.cancel(false);
             isPlaying.set(false);
-            view.hideProgress();
+            view.hideStepProgress();
         }
     }
 

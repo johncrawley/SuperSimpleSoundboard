@@ -10,7 +10,7 @@ import com.jacstuff.supersimplesoundboard.service.sounds.Sound;
 import com.jacstuff.supersimplesoundboard.service.sounds.SoundBank;
 import com.jacstuff.supersimplesoundboard.service.sounds.SoundFactory;
 import com.jacstuff.supersimplesoundboard.service.steps.SoundBoardService;
-import com.jacstuff.supersimplesoundboard.service.steps.SoundSteps;
+import com.jacstuff.supersimplesoundboard.service.steps.SongPart;
 import com.jacstuff.supersimplesoundboard.service.steps.StepPlayer;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
     private SoundBank soundBank;
     private List<SoundHolder> soundHolders;
     private StepPlayer stepPlayer;
-    private final SoundSteps soundSteps = new SoundSteps(16);
+    private final SongPart songPart = new SongPart(16);
 
 
     public SoundBoardServiceImpl() {
@@ -38,8 +38,7 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
         super.onCreate();
         soundPlayer = new SoundPlayer(getApplicationContext());
         loadSounds();
-        stepPlayer = new StepPlayer(soundSteps, soundPlayer, 70);
-
+        stepPlayer = new StepPlayer(songPart, soundPlayer, 70);
         setupSoundHolders();
     }
 
@@ -53,6 +52,7 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
     public void setView(MainActivity mainActivity){
         this.mainActivity = mainActivity;
         stepPlayer.setView(mainActivity);
+        songPart.setView(mainActivity);
     }
 
 

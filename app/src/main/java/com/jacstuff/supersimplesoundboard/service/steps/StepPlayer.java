@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StepPlayer {
 
-    private final SoundSteps soundSteps;
+    private final SongPart songPart;
     private final SoundPlayer soundPlayer;
     private final ScheduledExecutorService executorService;
     private ScheduledFuture<?> future;
@@ -21,8 +21,8 @@ public class StepPlayer {
     private final AtomicBoolean isPlaying = new AtomicBoolean();
     private MainView view;
 
-    public StepPlayer(SoundSteps soundSteps, SoundPlayer soundPlayer, int initialBpm){
-        this.soundSteps = soundSteps;
+    public StepPlayer(SongPart songPart, SoundPlayer soundPlayer, int initialBpm){
+        this.songPart = songPart;
         this.soundPlayer = soundPlayer;
         executorService = Executors.newScheduledThreadPool(1);
         this.bpm = initialBpm;
@@ -77,7 +77,7 @@ public class StepPlayer {
 
 
     private void playNextStep(){
-        for(Sound sound : soundSteps.getSoundsForStep(currentStepIndex)){
+        for(Sound sound : songPart.getSoundsForStep(currentStepIndex)){
             soundPlayer.playSound(sound);
         }
         view.setCurrentProgress(currentStepIndex);

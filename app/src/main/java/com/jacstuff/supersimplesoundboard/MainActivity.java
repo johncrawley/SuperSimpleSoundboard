@@ -21,6 +21,7 @@ import com.jacstuff.supersimplesoundboard.service.SoundBoardServiceImpl;
 import com.jacstuff.supersimplesoundboard.service.steps.SoundBoardService;
 import com.jacstuff.supersimplesoundboard.view.MainView;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -92,15 +93,22 @@ public class MainActivity extends AppCompatActivity implements MainView {
     }
 
 
-    @Override
-    public void setStep(int index, boolean... areStepsEnabled){
-        if(index >= stepLayout.getChildCount()){
+
+    public void setStep(int stepIndex, List<Boolean> enabledList) {
+        if(stepIndex < stepLayout.getChildCount()){
+            for(int soundIndex = 0; soundIndex < enabledList.size(); soundIndex++){
+                updateRowAtIndexForSoundAt(stepIndex, soundIndex, enabledList);
+            }
+        }
+    }
+
+
+    private void updateRowAtIndexForSoundAt(int stepIndex, int soundIndex, List<Boolean> enabledList){
+        ViewGroup row = (ViewGroup) stepLayout.getChildAt(stepIndex);
+        if(stepIndex >= row.getChildCount()){
             return;
         }
-        ViewGroup row = (ViewGroup) stepLayout.getChildAt(index);
-        for(int i = 0; i < Math.min(areStepsEnabled.length, row.getChildCount()); i++){
-            updateStepView(row.getChildAt(i), areStepsEnabled[i]);
-        }
+        updateStepView(row.getChildAt(stepIndex), enabledList.get(soundIndex));
     }
 
 

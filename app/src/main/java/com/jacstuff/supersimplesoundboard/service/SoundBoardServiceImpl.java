@@ -6,6 +6,7 @@ import android.os.Binder;
 import android.os.IBinder;
 
 import com.jacstuff.supersimplesoundboard.MainActivity;
+import com.jacstuff.supersimplesoundboard.service.preferences.PreferencesManager;
 import com.jacstuff.supersimplesoundboard.service.sounds.Sound;
 import com.jacstuff.supersimplesoundboard.service.sounds.SoundBank;
 import com.jacstuff.supersimplesoundboard.service.sounds.SoundFactory;
@@ -26,7 +27,8 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
     private SoundBank soundBank;
     private List<SoundHolder> soundHolders;
     private StepPlayer stepPlayer;
-    private final SongPart songPart = new SongPart(16);
+    private SongPart songPart;
+    private PreferencesManager preferencesManager;
 
 
     public SoundBoardServiceImpl() {
@@ -36,16 +38,21 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
     @Override
     public void onCreate() {
         super.onCreate();
+        preferencesManager = new PreferencesManager(getApplicationContext());
         soundPlayer = new SoundPlayer(getApplicationContext());
         loadSounds();
-        stepPlayer = new StepPlayer(songPart, soundPlayer, 70);
         setupSoundHolders();
+        songPart = new SongPart(16, soundHolders);
+        stepPlayer = new StepPlayer(songPart, soundPlayer, 70);
+        songPart.loadSteps(preferencesManager.getSteps());
     }
 
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        System.out.println("^^^ SoundboardServiceImpl onDestroy()");
+        preferencesManager.saveSteps(songPart.getSteps());
     }
 
 
@@ -53,6 +60,7 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
         this.mainActivity = mainActivity;
         stepPlayer.setView(mainActivity);
         songPart.setView(mainActivity);
+        songPart.updateView();
     }
 
 
@@ -94,19 +102,21 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
         }
     }
 
+
     @Override
     public void toggleStep(int stepIndex, int soundIndex){
-
+        songPart.toggleSelected(stepIndex, soundIndex);
     }
+
 
     @Override
     public void play() {
-
+        stepPlayer.play();
     }
 
     @Override
     public void stopAndReset(){
-
+        stepPlayer.stopAndReset();
     }
 
 

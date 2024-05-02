@@ -12,26 +12,41 @@ import java.util.stream.Collectors;
 
 public class SongPart {
 
-    private List<Set<SoundHolder>> steps;
-    private final List<SoundHolder> soundHolders;
+    private List<Set<SoundHolder>> soundsPerStep;
+    private List<SoundHolder> soundHolders;
     private List<List<Boolean>> enabledSteps = new ArrayList<>();
     private int numberOfSteps;
     private MainView view;
 
-    public SongPart(int numberOfSteps){
+    public SongPart(int numberOfSteps, List<SoundHolder> soundHolders){
         this.numberOfSteps = numberOfSteps;
-        soundHolders = new ArrayList<>();
+        setSoundHolders(soundHolders);
         initSteps();
         initEnabledSteps();
     }
 
 
+    public List<List<Boolean>> getSteps(){
+        return enabledSteps;
+    }
+
+
+    public void loadSteps(List<List<Boolean>> steps){
+        if(steps == null || steps.isEmpty()){
+            return;
+        }
+        enabledSteps = steps;
+        updateView();
+    }
+
+
     private void initSteps(){
-        steps = new ArrayList<>();
+        soundsPerStep = new ArrayList<>();
         for(int i=0; i < numberOfSteps; i++){
-            steps.add(new HashSet<>());
+            soundsPerStep.add(new HashSet<>());
         }
     }
+
 
     private void initEnabledSteps(){
         enabledSteps = new ArrayList<>();
@@ -39,6 +54,12 @@ public class SongPart {
             enabledSteps.add(createStepState());
         }
     }
+
+
+    public void setSoundHolders(List<SoundHolder> soundHolders){
+        this.soundHolders = new ArrayList<>(soundHolders);
+    }
+
 
     private List<Boolean> createStepState(){
         List<Boolean> enabledList = new ArrayList<>();
@@ -50,11 +71,11 @@ public class SongPart {
 
 
     public void toggleSelected(int stepIndex, int soundIndex){
-        if(stepIndex > steps.size()){
+        if(stepIndex > soundsPerStep.size()){
             return;
         }
         toggleIndex(stepIndex, soundIndex);
-        toggleSelected(steps.get(stepIndex), soundHolders.get(soundIndex));
+        toggleSelected(soundsPerStep.get(stepIndex), soundHolders.get(soundIndex));
     }
 
 
@@ -77,12 +98,18 @@ public class SongPart {
 
 
     public List<Sound> getSoundsForStep(int index){
-        return steps.get(index).stream().map(SoundHolder::sound).collect(Collectors.toList());
+        return soundsPerStep.get(index).stream().map(SoundHolder::sound).collect(Collectors.toList());
     }
 
 
     public void setView(MainView view){
         this.view = view;
+    }
+
+    public void updateView(){
+        for(int i = 0; i < enabledSteps.size(); i++){
+            view.setStep(i, enabledSteps.get(i));
+        }
     }
 
 

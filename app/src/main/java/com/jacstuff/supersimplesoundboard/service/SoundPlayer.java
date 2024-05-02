@@ -29,6 +29,7 @@ public class SoundPlayer {
         if(sound == null){
             return;
         }
+        soundPool.stop(sound.getSoundPoolId());
         soundPool.play(sound.getSoundPoolId(), 100,100, 1, 0,0.8f);
     }
 
@@ -59,7 +60,7 @@ public class SoundPlayer {
                 .build();
 
         soundPool = new SoundPool.Builder()
-                .setMaxStreams(6)
+                .setMaxStreams(12)
                 .setAudioAttributes(attributes)
                 .build();
     }

@@ -21,13 +21,13 @@ public class SongPart {
     public SongPart(int numberOfSteps, List<SoundHolder> soundHolders){
         this.numberOfSteps = numberOfSteps;
         setSoundHolders(soundHolders);
-        initSteps();
+        initSoundsPerStepList();
         initEnabledSteps();
     }
 
 
     public List<List<Boolean>> getSteps(){
-        return enabledSteps;
+        return new ArrayList<>(enabledSteps);
     }
 
 
@@ -36,11 +36,21 @@ public class SongPart {
             return;
         }
         enabledSteps = steps;
-        updateView();
+        log("loadSteps() enabled steps size: " + enabledSteps.size());
     }
 
 
-    private void initSteps(){
+    private void updateSoundsPerStepList(){
+        for(int i = 0; i< numberOfSteps; i++){
+            for(int j = 0; j < Math.min(soundHolders.size(),8); j ++){
+
+            }
+        }
+
+    }
+
+
+    private void initSoundsPerStepList(){
         soundsPerStep = new ArrayList<>();
         for(int i=0; i < numberOfSteps; i++){
             soundsPerStep.add(new HashSet<>());
@@ -53,6 +63,7 @@ public class SongPart {
         for(int i = 0; i < numberOfSteps; i++){
             enabledSteps.add(createStepState());
         }
+        log("initEnabledSteps() size: " + enabledSteps.size());
     }
 
 
@@ -71,7 +82,7 @@ public class SongPart {
 
 
     public void toggleSelected(int stepIndex, int soundIndex){
-        if(stepIndex > soundsPerStep.size()){
+        if(stepIndex >= numberOfSteps || soundIndex >= soundsPerStep.size()){
             return;
         }
         toggleIndex(stepIndex, soundIndex);
@@ -80,6 +91,11 @@ public class SongPart {
 
 
     private void toggleIndex(int stepIndex, int soundIndex){
+        log("toggleIndex() stepIndex: " + stepIndex + " soundIndex: " + soundIndex + " enabledSteps.size() : " + enabledSteps.size());
+        if(stepIndex >= enabledSteps.size()){
+            log("toggleIndex step index exceeded");
+            return;
+        }
         List<Boolean> enabledSounds = enabledSteps.get(stepIndex);
         if(enabledSounds != null && soundIndex < enabledSounds.size()){
             boolean oldSoundIndex = enabledSounds.get(soundIndex);
@@ -94,6 +110,10 @@ public class SongPart {
         }else{
             step.add(soundHolder);
         }
+    }
+
+    private void log(String msg){
+        System.out.println("^^^ SongPart: " + msg);
     }
 
 

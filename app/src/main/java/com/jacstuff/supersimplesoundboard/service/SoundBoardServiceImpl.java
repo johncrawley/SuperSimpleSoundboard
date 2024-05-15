@@ -29,7 +29,7 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
     private StepPlayer stepPlayer;
     private SongPart songPart;
     private PreferencesManager preferencesManager;
-
+    private boolean isFirstAttach;
 
     public SoundBoardServiceImpl() {
     }
@@ -38,13 +38,13 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
     @Override
     public void onCreate() {
         super.onCreate();
+        isFirstAttach = true;
         preferencesManager = new PreferencesManager(getApplicationContext());
         soundPlayer = new SoundPlayer(getApplicationContext());
         loadSounds();
         setupSoundHolders();
         songPart = new SongPart(16, soundHolders);
         stepPlayer = new StepPlayer(songPart, soundPlayer, 70);
-        songPart.loadSteps(preferencesManager.getSteps());
     }
 
 
@@ -60,6 +60,9 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
         this.mainActivity = mainActivity;
         stepPlayer.setView(mainActivity);
         songPart.setView(mainActivity);
+        if(isFirstAttach) {
+           songPart.loadSteps(preferencesManager.getSteps());
+        }
         songPart.updateView();
     }
 

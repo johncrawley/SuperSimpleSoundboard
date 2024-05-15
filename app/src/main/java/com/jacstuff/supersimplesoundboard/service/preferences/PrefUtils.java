@@ -28,7 +28,7 @@ public class PrefUtils {
 
 
     public static List<Boolean> convertToBoolArray(String savedStr){
-        if(savedStr == null || savedStr.length() == 0){
+        if(savedStr == null || savedStr.isEmpty()){
             return Collections.emptyList();
         }
         String[] strArray = savedStr.split("");

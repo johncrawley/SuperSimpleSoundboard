@@ -50,13 +50,25 @@ public class PrefUtilsTest {
     @Test
     public void canConvertStepsToAStringAndBack(){
         List<List<Boolean>> steps = new ArrayList<>();
-        steps.add(List.of(true,true,true));
+        steps.add(List.of(true, true, true));
         steps.add(List.of(false, true, true));
         steps.add(List.of(false, false, false));
 
         String savedStr = PrefUtils.convertToStr(steps);
         assertEquals("111011000", savedStr);
         List<List<Boolean>> retrievedSteps = PrefUtils.getStepsFor(savedStr, 3);
+        for(int i = 0; i< steps.size(); i++) {
+            assertListsAreEqual(steps.get(i), retrievedSteps.get(i));
+        }
+
+        steps.clear();
+        steps.add(List.of(true, true, true, true));
+        steps.add(List.of(false, true, true, false));
+        steps.add(List.of(false, false, false, true));
+
+        savedStr = PrefUtils.convertToStr(steps);
+        assertEquals("111101100001", savedStr);
+        retrievedSteps = PrefUtils.getStepsFor(savedStr, 4);
         for(int i = 0; i< steps.size(); i++) {
             assertListsAreEqual(steps.get(i), retrievedSteps.get(i));
         }

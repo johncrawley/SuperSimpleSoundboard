@@ -16,13 +16,22 @@ public class PreferencesManager {
 
     public List<List<Boolean>> getSteps(){
        String savedStepsStr =  getPrefs().getString(Prop.CURRENT_SONG_PART.toString(), "");
+       log("Entered getSteps() savedStepStr: " + savedStepsStr);
        int numberOfSteps = getPrefs().getInt(Prop.NUMBER_OF_STEPS.toString(), 16);
+        List<List<Boolean>> temp = PrefUtils.getStepsFor(savedStepsStr, numberOfSteps);
+        log("numberOfSteps: " + temp.size());
+        log("number of sounds per step: " + temp.get(0).size());
         return PrefUtils.getStepsFor(savedStepsStr, numberOfSteps);
     }
 
 
+    private void log(String msg){
+        System.out.println("^^^ PreferencesManager: " + msg);
+    }
+
 
     public void saveSteps(List<List<Boolean>> steps){
+        log("Entered saveSteps() steps size: " + steps.size());
         getPrefs().edit()
                 .putString(PreferencesManager.Prop.CURRENT_SONG_PART.toString(), PrefUtils.convertToStr(steps))
                 .apply();

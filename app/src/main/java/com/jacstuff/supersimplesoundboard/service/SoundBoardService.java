@@ -1,4 +1,4 @@
-package com.jacstuff.supersimplesoundboard.service.steps;
+package com.jacstuff.supersimplesoundboard.service;
 
 import com.jacstuff.supersimplesoundboard.service.sounds.Sound;
 
@@ -11,5 +11,7 @@ public interface SoundBoardService {
     void playSoundAtIndex(int index);
     void toggleStep(int stepIndex, int soundIndex);
     void setBpm(int bpm);
+    void onPause();
+    void onResume();
 
 }

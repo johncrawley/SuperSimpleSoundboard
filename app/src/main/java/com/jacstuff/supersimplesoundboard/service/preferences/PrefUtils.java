@@ -3,17 +3,24 @@ package com.jacstuff.supersimplesoundboard.service.preferences;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class PrefUtils {
 
     public static List<List<Boolean>> getStepsFor(String savedStr, int numberOfSteps){
         List<Boolean> isEnabledList = convertToBoolArray(savedStr);
         int numberOfSounds = isEnabledList.size() / numberOfSteps;
+        log("getStepsFor() savedStr length: " + savedStr.length() + " numberOfSteps: " + numberOfSteps + " numberOfSounds: " + numberOfSounds);
         List<List<Boolean>> steps = new ArrayList<>();
-        for(int i = 0, index = 0; i < numberOfSounds; i++, index+= numberOfSteps){
+        for(int i = 0, index = 0; i < numberOfSounds; i++, index += numberOfSteps){
             addRowTo(steps, isEnabledList, numberOfSteps, index);
         }
         return steps;
+    }
+
+
+    private static void log(String msg){
+        System.out.println("^^^ PrefUtils: " + msg);
     }
 
 

@@ -18,7 +18,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.jacstuff.supersimplesoundboard.service.SoundBoardServiceImpl;
-import com.jacstuff.supersimplesoundboard.service.steps.SoundBoardService;
+import com.jacstuff.supersimplesoundboard.service.SoundBoardService;
 import com.jacstuff.supersimplesoundboard.view.MainView;
 
 import java.util.List;
@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
     private View currentlySelectedProgressView;
     private ViewGroup progressLayout;
     private final int unselectedProgressColor = Color.DKGRAY;
-    private SoundBoardServiceImpl soundboardService;
+    private SoundBoardServiceImpl service;
     private final AtomicBoolean isServiceConnected = new AtomicBoolean();
 
 
@@ -43,8 +43,8 @@ public class MainActivity extends AppCompatActivity implements MainView {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             SoundBoardServiceImpl.LocalBinder binder = (SoundBoardServiceImpl.LocalBinder) service;
-            soundboardService = binder.getService();
-            soundboardService.setView(MainActivity.this);
+            MainActivity.this.service = binder.getService();
+            MainActivity.this.service.setView(MainActivity.this);
             isServiceConnected.set(true);
         }
 
@@ -74,7 +74,22 @@ public class MainActivity extends AppCompatActivity implements MainView {
         getApplicationContext().bindService(mediaPlayerServiceIntent, serviceConnection, 0);
     }
 
+    @Override
+    public void onPause(){
+        super.onPause();
+        if(service != null){
+            service.onPause();
+        }
+    }
 
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if(service != null){
+            service.onResume();
+        }
+    }
 
     private void setupPlaybackButtons(){
         setupButton(R.id.playButton, ()-> getService().ifPresent(SoundBoardService::play));
@@ -83,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
 
     private Optional<SoundBoardServiceImpl> getService(){
-        return Optional.ofNullable(soundboardService);
+        return Optional.ofNullable(service);
     }
 
 
@@ -98,6 +113,17 @@ public class MainActivity extends AppCompatActivity implements MainView {
         if(stepIndex < stepLayout.getChildCount()){
             for(int soundIndex = 0; soundIndex < enabledList.size(); soundIndex++){
                 updateRowAtIndexForSoundAt(stepIndex, soundIndex, enabledList);
+            }
+        }
+    }
+
+
+    public void setStepRow(int rowIndex, List<Boolean> steps) {
+        if(rowIndex < stepLayout.getChildCount()){
+            ViewGroup row = (ViewGroup) stepLayout.getChildAt(rowIndex);
+            int smallestMax = Math.min(steps.size(), row.getChildCount());
+            for(int stepIndex = 0; stepIndex < smallestMax; stepIndex++){
+                updateStepView(row.getChildAt(stepIndex), steps.get(stepIndex));
             }
         }
     }
@@ -195,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
 
     private void onStepClick(View v, int rowId, int stepIndex){
-        soundboardService.toggleStep(stepIndex, rowId);
+        service.toggleStep(stepIndex, rowId);
         updateStepView(v, !v.isSelected());
     }
 
@@ -257,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
     private void setupButton(int id, int index){
         Button button = findViewById(id);
         button.setPadding(-5,2,-5,2);
-        button.setOnClickListener(v -> soundboardService.playSoundAtIndex(index));
+        button.setOnClickListener(v -> service.playSoundAtIndex(index));
     }
 
 

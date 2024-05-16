@@ -17,16 +17,29 @@ public class PreferencesManager {
     public List<List<Boolean>> getSteps(){
        String savedStepsStr =  getPrefs().getString(Prop.CURRENT_SONG_PART.toString(), "");
        log("Entered getSteps() savedStepStr: " + savedStepsStr);
-       int numberOfSteps = getPrefs().getInt(Prop.NUMBER_OF_STEPS.toString(), 16);
+       int numberOfSteps = 16 ;//getPrefs().getInt(Prop.NUMBER_OF_STEPS.toString(), 16);
         List<List<Boolean>> temp = PrefUtils.getStepsFor(savedStepsStr, numberOfSteps);
         log("numberOfSteps: " + temp.size());
         log("number of sounds per step: " + temp.get(0).size());
+        printStepRows(PrefUtils.getStepsFor(savedStepsStr, numberOfSteps));
         return PrefUtils.getStepsFor(savedStepsStr, numberOfSteps);
     }
 
 
     private void log(String msg){
         System.out.println("^^^ PreferencesManager: " + msg);
+    }
+
+
+    public void printStepRows(List<List<Boolean>> stepRows){
+        for(List<Boolean> stepRow : stepRows){
+            StringBuilder str = new StringBuilder();
+            for(boolean cell : stepRow){
+                str.append(cell);
+                str.append(" ");
+            }
+            log("--> " + str);
+        }
     }
 
 

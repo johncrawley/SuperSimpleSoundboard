@@ -10,7 +10,6 @@ import com.jacstuff.supersimplesoundboard.service.preferences.PreferencesManager
 import com.jacstuff.supersimplesoundboard.service.sounds.Sound;
 import com.jacstuff.supersimplesoundboard.service.sounds.SoundBank;
 import com.jacstuff.supersimplesoundboard.service.sounds.SoundFactory;
-import com.jacstuff.supersimplesoundboard.service.steps.SoundBoardService;
 import com.jacstuff.supersimplesoundboard.service.steps.SongPart;
 import com.jacstuff.supersimplesoundboard.service.steps.StepPlayer;
 
@@ -45,14 +44,20 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
         setupSoundHolders();
         songPart = new SongPart(16, soundHolders);
         stepPlayer = new StepPlayer(songPart, soundPlayer, 70);
+        loadSavedSteps();
     }
 
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        System.out.println("^^^ SoundboardServiceImpl onDestroy()");
+        log("Entered onDestroy()");
         preferencesManager.saveSteps(songPart.getSteps());
+    }
+
+
+    private void log(String msg){
+        System.out.println("^^^ SoundBoardServiceImpl: " + msg);
     }
 
 
@@ -61,9 +66,28 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
         stepPlayer.setView(mainActivity);
         songPart.setView(mainActivity);
         if(isFirstAttach) {
-           songPart.loadSteps(preferencesManager.getSteps());
+            loadSavedSteps();
         }
         songPart.updateView();
+    }
+
+
+    @Override
+    public void onPause(){
+        log("Entered onPause()");
+        preferencesManager.saveSteps(songPart.getSteps());
+    }
+
+
+    @Override
+    public void onResume(){
+        loadSavedSteps();
+        songPart.updateView();
+    }
+
+
+    private void loadSavedSteps(){
+        songPart.loadSteps(preferencesManager.getSteps());
     }
 
 

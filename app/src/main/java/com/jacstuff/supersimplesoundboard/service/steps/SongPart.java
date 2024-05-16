@@ -14,7 +14,7 @@ public class SongPart {
 
     private List<Set<SoundHolder>> soundsPerStep;
     private List<SoundHolder> soundHolders;
-    private List<List<Boolean>> enabledSteps = new ArrayList<>();
+    private List<List<Boolean>> enabledStepRows = new ArrayList<>();
     private int numberOfSteps;
     private MainView view;
 
@@ -27,23 +27,29 @@ public class SongPart {
 
 
     public List<List<Boolean>> getSteps(){
-        return new ArrayList<>(enabledSteps);
+        return new ArrayList<>(enabledStepRows);
     }
 
 
-    public void loadSteps(List<List<Boolean>> steps){
-        if(steps == null || steps.isEmpty()){
+    public void loadSteps(List<List<Boolean>> stepRows){
+        if(stepRows == null || stepRows.isEmpty()){
             return;
         }
-        enabledSteps = steps;
-        log("loadSteps() enabled steps size: " + enabledSteps.size());
+        enabledStepRows = stepRows;
+        updateSoundsPerStepList(stepRows);
+        log("loadSteps() enabled steps size: " + enabledStepRows.size());
     }
 
+// private List<Set<SoundHolder>> soundsPerStep;
 
-    private void updateSoundsPerStepList(){
-        for(int i = 0; i< numberOfSteps; i++){
-            for(int j = 0; j < Math.min(soundHolders.size(),8); j ++){
+    private void updateSoundsPerStepList(List<List<Boolean>> stepRows){
+        numberOfSteps = stepRows.get(0).size();
+        initSoundsPerStepList();
 
+        for(int stepIndex = 0; stepIndex< numberOfSteps; stepIndex++){
+            for(int soundIndex= 0; soundIndex < Math.min(soundHolders.size(),8); soundIndex ++){
+                boolean isEnabled = stepRows.get(soundIndex).get(stepIndex);
+                setSelected(stepIndex, soundIndex, isEnabled);
             }
         }
 
@@ -59,11 +65,11 @@ public class SongPart {
 
 
     private void initEnabledSteps(){
-        enabledSteps = new ArrayList<>();
+        enabledStepRows = new ArrayList<>();
         for(int i = 0; i < numberOfSteps; i++){
-            enabledSteps.add(createStepState());
+            enabledStepRows.add(createStepState());
         }
-        log("initEnabledSteps() size: " + enabledSteps.size());
+        log("initEnabledSteps() size: " + enabledStepRows.size());
     }
 
 
@@ -91,15 +97,15 @@ public class SongPart {
 
 
     private void toggleIndex(int stepIndex, int soundIndex){
-        log("toggleIndex() stepIndex: " + stepIndex + " soundIndex: " + soundIndex + " enabledSteps.size() : " + enabledSteps.size());
-        if(stepIndex >= enabledSteps.size()){
+        log("toggleIndex() stepIndex: " + stepIndex + " soundIndex: " + soundIndex + " enabledSteps.size() : " + enabledStepRows.size());
+        if(soundIndex >= enabledStepRows.size()){
             log("toggleIndex step index exceeded");
             return;
         }
-        List<Boolean> enabledSounds = enabledSteps.get(stepIndex);
-        if(enabledSounds != null && soundIndex < enabledSounds.size()){
-            boolean oldSoundIndex = enabledSounds.get(soundIndex);
-            enabledSounds.set(soundIndex, !oldSoundIndex);
+        List<Boolean> row = enabledStepRows.get(soundIndex);
+        if(row != null && stepIndex < row.size()){
+            boolean oldState = row.get(stepIndex);
+            row.set(stepIndex, !oldState);
         }
     }
 
@@ -111,6 +117,26 @@ public class SongPart {
             step.add(soundHolder);
         }
     }
+
+
+    private void setSelected(int stepIndex, int soundIndex, boolean isEnabled){
+        if(stepIndex >= numberOfSteps || soundIndex >= soundsPerStep.size()){
+            return;
+        }
+        toggleIndex(stepIndex, soundIndex);
+        setSelectedSound(soundsPerStep.get(stepIndex), soundHolders.get(soundIndex), isEnabled);
+    }
+
+
+    private void setSelectedSound(Set<SoundHolder> step, SoundHolder soundHolder, boolean isSelected){
+        if(isSelected){
+            step.add(soundHolder);
+        }
+        else{
+            step.remove(soundHolder);
+        }
+    }
+
 
     private void log(String msg){
         System.out.println("^^^ SongPart: " + msg);
@@ -126,9 +152,14 @@ public class SongPart {
         this.view = view;
     }
 
+
     public void updateView(){
-        for(int i = 0; i < enabledSteps.size(); i++){
-            view.setStep(i, enabledSteps.get(i));
+        if(view == null){
+            log("updateView() view is null, returning");
+            return;
+        }
+        for(int i = 0; i < enabledStepRows.size(); i++){
+            view.setStepRow(i, enabledStepRows.get(i));
         }
     }
 

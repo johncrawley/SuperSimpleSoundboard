@@ -40,7 +40,6 @@ public class SongPart {
         log("loadSteps() enabled steps size: " + enabledStepRows.size());
     }
 
-// private List<Set<SoundHolder>> soundsPerStep;
 
     private void updateSoundsPerStepList(List<List<Boolean>> stepRows){
         numberOfSteps = stepRows.get(0).size();
@@ -52,7 +51,6 @@ public class SongPart {
                 setSelected(stepIndex, soundIndex, isEnabled);
             }
         }
-
     }
 
 
@@ -123,7 +121,6 @@ public class SongPart {
         if(stepIndex >= numberOfSteps || soundIndex >= soundsPerStep.size()){
             return;
         }
-        toggleIndex(stepIndex, soundIndex);
         setSelectedSound(soundsPerStep.get(stepIndex), soundHolders.get(soundIndex), isEnabled);
     }
 

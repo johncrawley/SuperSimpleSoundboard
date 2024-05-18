@@ -30,7 +30,7 @@ public class SoundPlayer {
             return;
         }
         soundPool.stop(sound.getSoundPoolId());
-        soundPool.play(sound.getSoundPoolId(), 100,100, 1, 0,0.8f);
+        soundPool.play(sound.getSoundPoolId(), 100,100, 1, 0,1.1f);
     }
 
 

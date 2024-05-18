@@ -15,9 +15,18 @@ public class PreferencesManager {
 
 
     public List<List<Boolean>> getSteps(){
-       String savedStepsStr =  getPrefs().getString(Prop.CURRENT_SONG_PART.toString(), "");
-       log("Entered getSteps() savedStepStr: " + savedStepsStr);
-       int numberOfSteps = 16 ;//getPrefs().getInt(Prop.NUMBER_OF_STEPS.toString(), 16);
+        String savedStepsStr =  getPrefs().getString(Prop.CURRENT_SONG_PART.toString(), "");
+        log("Entered getSteps() savedStepStr: " + savedStepsStr);
+        int numberOfSteps = 16 ;//getPrefs().getInt(Prop.NUMBER_OF_STEPS.toString(), 16);
+        printStepRows(PrefUtils.getStepsFor(savedStepsStr, numberOfSteps));
+        return PrefUtils.getStepsFor(savedStepsStr, numberOfSteps);
+    }
+
+
+    public List<List<Boolean>> getSteps(int index){
+        String savedStepsStr =  getPrefs().getString(getSongPartProp(index), "");
+        log("Entered getSteps() savedStepStr: " + savedStepsStr);
+        int numberOfSteps = 16 ;//getPrefs().getInt(Prop.NUMBER_OF_STEPS.toString(), 16);
         printStepRows(PrefUtils.getStepsFor(savedStepsStr, numberOfSteps));
         return PrefUtils.getStepsFor(savedStepsStr, numberOfSteps);
     }
@@ -40,12 +49,22 @@ public class PreferencesManager {
 
 
     public void saveSteps(List<List<Boolean>> steps){
-        log("Entered saveSteps() steps size: " + steps.size());
         getPrefs().edit()
                 .putString(PreferencesManager.Prop.CURRENT_SONG_PART.toString(), PrefUtils.convertToStr(steps))
                 .apply();
     }
 
+
+    public void saveSteps(List<List<Boolean>> steps, int index){
+        getPrefs().edit()
+                .putString(getSongPartProp(index), PrefUtils.convertToStr(steps))
+                .apply();
+    }
+
+
+    private String getSongPartProp(int index){
+        return PreferencesManager.Prop.CURRENT_SONG_PART.toString() + "_"  + index;
+    }
 
     private SharedPreferences getPrefs(){
         return context.getSharedPreferences("soundboard", Context.MODE_PRIVATE);

@@ -1,8 +1,5 @@
 package com.jacstuff.supersimplesoundboard.service;
 
-import com.jacstuff.supersimplesoundboard.service.sounds.Sound;
-
-import java.util.Optional;
 
 public interface SoundBoardService {
 

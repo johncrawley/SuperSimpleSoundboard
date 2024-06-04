@@ -30,8 +30,11 @@ public class StepPlayer {
 
 
     public void play(){
+        if(isPlaying.get()){
+            return;
+        }
         currentStepIndex = 0;
-        future = executorService.scheduleAtFixedRate(this::playNextStep, 0, getIntervalFromBpm(), TimeUnit.MILLISECONDS);
+        future = executorService.scheduleWithFixedDelay(this::playNextStep, 0, getIntervalFromBpm(), TimeUnit.MILLISECONDS);
         isPlaying.set(true);
     }
 
@@ -63,9 +66,12 @@ public class StepPlayer {
 
 
     private void stop(){
+        if(!isPlaying.get()){
+            return;
+        }
+        isPlaying.set(false);
         if(future != null && !future.isCancelled()){
             future.cancel(false);
-            isPlaying.set(false);
             view.hideStepProgress();
         }
     }

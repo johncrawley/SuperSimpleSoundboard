@@ -91,10 +91,13 @@ public class MainActivity extends AppCompatActivity implements MainView {
         }
     }
 
+
     private void setupPlaybackButtons(){
         setupButton(R.id.playButton, ()-> getService().ifPresent(SoundBoardService::play));
         setupButton(R.id.stopButton, ()-> getService().ifPresent(SoundBoardService::stopAndReset));
     }
+
+
 
 
     private Optional<SoundBoardServiceImpl> getService(){

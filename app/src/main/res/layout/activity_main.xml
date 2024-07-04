@@ -7,6 +7,34 @@
     android:background="@color/background"
     tools:context=".MainActivity">
 
+    <LinearLayout
+        tools:ignore="ButtonStyle"
+        android:id="@+id/recordButtonsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:weightSum="4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/buttonLayoutRow2"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/recordSoundButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="record"/>
+        <Button
+            android:id="@+id/playRecordingButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="stop"/>
+
+
+
+    </LinearLayout>
+
 
     <LinearLayout
         tools:ignore="ButtonStyle"

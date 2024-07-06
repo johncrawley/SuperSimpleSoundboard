@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
         super.onCreate(savedInstanceState);
         requestPermissions();
         setContentView(R.layout.activity_main);
-        setupRecordingButtons();
+        setupRecording();
         assignButtonLayout();
         startService();
         setupSoundButtons();
@@ -310,11 +310,13 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private static String fileName = null;
-
-
     private MediaRecorder recorder = null;
-
     private MediaPlayer player = null;
+    private Button recordSoundButton, playRecordingButton;
+    private ViewGroup recordButtonsLayout;
+    private boolean isRecording;
+    private boolean isPlaying;
+
 
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
@@ -340,11 +342,11 @@ public class MainActivity extends AppCompatActivity implements MainView {
             }
     );
 
-    private Button recordSoundButton, playRecordingButton;
-    private ViewGroup recordButtonsLayout;
-    private boolean isRecording;
-    private boolean isPlaying;
 
+    private void setupRecording(){
+        setupRecordingButtons();
+        setupFilePathName();
+    }
 
     private void setupRecordingButtons(){
         recordSoundButton = findViewById(R.id.recordSoundButton);
@@ -359,6 +361,13 @@ public class MainActivity extends AppCompatActivity implements MainView {
         } );
     }
 
+
+    private void setupFilePathName(){
+        fileName = getFilesDir() + "/test.wav";
+    }
+
+
+
     private void requestPermissions(){
         askPermissionFor(RECORD_AUDIO, recordAudioPermissionLauncher);
     }
@@ -372,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
 
     private void onRecord() {
-        if (isRecording) {
+        if (!isRecording) {
             startRecording();
         } else {
             stopRecording();
@@ -381,7 +390,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
 
     private void playRecordedSound() {
-        if (isPlaying) {
+        if (!isPlaying) {
             startPlaying();
         } else {
             stopPlaying();

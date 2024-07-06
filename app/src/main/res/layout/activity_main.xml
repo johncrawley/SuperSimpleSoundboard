@@ -14,10 +14,8 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
         android:weightSum="4"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/buttonLayoutRow2"
         android:orientation="horizontal">
 
         <Button

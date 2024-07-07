@@ -1,114 +1,105 @@
 package com.jacstuff.supersimplesoundboard.service.recorder;
 
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.media.AudioFormat;
-import android.media.AudioRecord;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 
-import androidx.core.app.ActivityCompat;
-
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class AudioRecorder {
 
-    private static final int RECORDER_SAMPLE_RATE = 8000;
-    private static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
-    private static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
-    private final int BufferElements2Rec = 1024; // want to play 2048 (2K) since 2 bytes we use only 1024
-    private final int BytesPerElement = 2; // 2 bytes in 16bit format
-    private AudioRecord recorder = null;
-    private Thread recordingThread = null;
-    private boolean isRecording = false;
-    private final Context context;
+    private static String fileName = null;
+    private MediaRecorder recorder = null;
+    private MediaPlayer player = null;
+    private boolean isRecording;
+    private boolean isPlaying;
 
-
-
-    int bufferSize = AudioRecord.getMinBufferSize(RECORDER_SAMPLE_RATE,
-            RECORDER_CHANNELS, RECORDER_AUDIO_ENCODING);
 
     public AudioRecorder(Context context){
-        this.context = context;
+        setupFilePathName(context);
+    }
+
+    public void toggleRecord(){
+        if (!isRecording) {
+            startRecording();
+        } else {
+            stopRecording();
+        }
     }
 
 
-    public void startRecording() {
-
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+    public void togglePlay(){
+        if(isRecording){
+            stopRecording();
         }
-        recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
-                RECORDER_SAMPLE_RATE,
-                RECORDER_CHANNELS,
-                RECORDER_AUDIO_ENCODING,
-                BufferElements2Rec * BytesPerElement);
+        playRecordedSound();
+    }
 
-        recorder.startRecording();
+
+    private void setupFilePathName(Context context){
+        fileName = context.getFilesDir() + "/test.wav";
+    }
+
+
+    private void playRecordedSound() {
+        if (!isPlaying) {
+            startPlaying();
+        } else {
+            stopPlaying();
+        }
+    }
+
+
+    private void startPlaying() {
+        player = new MediaPlayer();
+        try {
+            player.setDataSource(fileName);
+            player.prepare();
+            player.start();
+            isPlaying = true;
+            player.setOnCompletionListener(mediaPlayer -> isPlaying = false);
+        } catch (IOException e) {
+            isPlaying = false;
+            log("start playing prepare() failed");
+        }
+    }
+
+
+    private void stopPlaying() {
+        player.release();
+        player = null;
+    }
+
+
+    private void startRecording() {
         isRecording = true;
-        recordingThread = new Thread(new Runnable() {
-            public void run() {
-                writeAudioDataToFile();
-            }
-        }, "AudioRecorder Thread");
-        recordingThread.start();
-    }
+        recorder = new MediaRecorder();
+        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        recorder.setOutputFile(fileName);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
-
-
-    public void stopRecording() {
-        if (null != recorder) {
+        try {
+            recorder.prepare();
+            recorder.start();
+        } catch (IOException e) {
+            log("startRecording() prepare() failed");
             isRecording = false;
-            recorder.stop();
-            recorder.release();
-            recorder = null;
-            recordingThread = null;
         }
-    }
-
-
-    //convert short to byte
-    private byte[] short2byte(short[] sData) {
-        byte[] bytes = new byte[sData.length * 2];
-        for(int i = 0; i < sData.length; i++) {
-            bytes[i * 2] = (byte) (sData[i] & 0x00FF);
-            bytes[(i * 2) + 1] = (byte) (sData[i] >> 8);
-            sData[i] = 0;
-        }
-        return bytes;
     }
 
 
     private void log(String msg){
-        System.out.println("AudioRecorder: " + msg);
+        System.out.println("^^^ MainActivity: " + msg);
     }
 
 
-    private void writeAudioDataToFile() {
-        // Write the output audio in byte
-
-        String filePath = "/sdcard/voice8K16bitmono.pcm";
-        short[] sData = new short[BufferElements2Rec];
-
-        try (FileOutputStream os = new FileOutputStream(filePath)){
-            while (isRecording) {
-                recorder.read(sData, 0, BufferElements2Rec);
-                byte[] bData = short2byte(sData);
-                os.write(bData, 0, BufferElements2Rec * BytesPerElement);
-            }
-
-        } catch (IOException  e) {
-            log(e.getMessage());
-        }
+    private void stopRecording() {
+        recorder.stop();
+        recorder.release();
+        recorder = null;
+        isRecording = false;
     }
 
 

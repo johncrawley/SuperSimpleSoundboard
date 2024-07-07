@@ -2,7 +2,6 @@ package com.jacstuff.supersimplesoundboard;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -11,8 +10,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
@@ -27,9 +24,9 @@ import android.widget.TextView;
 import static android.Manifest.permission.RECORD_AUDIO;
 import com.jacstuff.supersimplesoundboard.service.SoundBoardServiceImpl;
 import com.jacstuff.supersimplesoundboard.service.SoundBoardService;
+import com.jacstuff.supersimplesoundboard.service.recorder.AudioRecorder;
 import com.jacstuff.supersimplesoundboard.view.MainView;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements MainView {
     private final int unselectedProgressColor = Color.DKGRAY;
     private SoundBoardServiceImpl service;
     private final AtomicBoolean isServiceConnected = new AtomicBoolean();
+    private AudioRecorder audioRecorder;
+    private Button recordSoundButton, playRecordingButton;
 
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
@@ -69,7 +68,8 @@ public class MainActivity extends AppCompatActivity implements MainView {
         super.onCreate(savedInstanceState);
         requestPermissions();
         setContentView(R.layout.activity_main);
-        setupRecording();
+        audioRecorder = new AudioRecorder(getApplicationContext());
+        setupRecordingButtons();
         assignButtonLayout();
         startService();
         setupSoundButtons();
@@ -308,64 +308,24 @@ public class MainActivity extends AppCompatActivity implements MainView {
     }
 
 
-    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private static String fileName = null;
-    private MediaRecorder recorder = null;
-    private MediaPlayer player = null;
-    private Button recordSoundButton, playRecordingButton;
-    private ViewGroup recordButtonsLayout;
-    private boolean isRecording;
-    private boolean isPlaying;
-
-
-    // Requesting permission to RECORD_AUDIO
-    private boolean permissionToRecordAccepted = false;
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode){
-            case REQUEST_RECORD_AUDIO_PERMISSION:
-                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                break;
-        }
-        if (!permissionToRecordAccepted ) finish();
-
-    }
-
     private final ActivityResultLauncher<String> recordAudioPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
             result -> {
                 if (result) {
-
+                    // enable recording dialog
                 }
             }
     );
 
 
-    private void setupRecording(){
-        setupRecordingButtons();
-        setupFilePathName();
-    }
 
     private void setupRecordingButtons(){
         recordSoundButton = findViewById(R.id.recordSoundButton);
-        recordSoundButton.setOnClickListener(v -> onRecord());
+        recordSoundButton.setOnClickListener(v -> audioRecorder.toggleRecord());
 
         playRecordingButton = findViewById(R.id.playRecordingButton);
-        playRecordingButton.setOnClickListener(v -> {
-            if(isRecording){
-                stopRecording();
-            }
-            playRecordedSound();
-        } );
+        playRecordingButton.setOnClickListener(v -> audioRecorder.togglePlay());
     }
-
-
-    private void setupFilePathName(){
-        fileName = getFilesDir() + "/test.wav";
-    }
-
 
 
     private void requestPermissions(){
@@ -380,70 +340,6 @@ public class MainActivity extends AppCompatActivity implements MainView {
     }
 
 
-    private void onRecord() {
-        if (!isRecording) {
-            startRecording();
-        } else {
-            stopRecording();
-        }
-    }
 
-
-    private void playRecordedSound() {
-        if (!isPlaying) {
-            startPlaying();
-        } else {
-            stopPlaying();
-        }
-    }
-
-
-    private void startPlaying() {
-        player = new MediaPlayer();
-        try {
-            player.setDataSource(fileName);
-            player.prepare();
-            player.start();
-        } catch (IOException e) {
-            log("start playing prepare() failed");
-        }
-    }
-
-
-    private void stopPlaying() {
-        player.release();
-        player = null;
-    }
-
-
-    private void startRecording() {
-        isRecording = true;
-        recorder = new MediaRecorder();
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        recorder.setOutputFile(fileName);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
-        try {
-            recorder.prepare();
-            recorder.start();
-        } catch (IOException e) {
-           log("startRecording() prepare() failed");
-           isRecording = false;
-        }
-    }
-
-
-    private void log(String msg){
-        System.out.println("^^^ MainActivity: " + msg);
-    }
-
-
-    private void stopRecording() {
-        recorder.stop();
-        recorder.release();
-        recorder = null;
-        isRecording = false;
-    }
 
 }

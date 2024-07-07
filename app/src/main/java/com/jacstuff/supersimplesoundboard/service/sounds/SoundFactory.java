@@ -10,7 +10,7 @@ public class SoundFactory {
 
     public SoundFactory(){
         soundBanks = new HashMap<>(32);
-        createSoundNoteBanks();
+       // createSoundNoteBanks();
         createSoundBanks();
     }
 

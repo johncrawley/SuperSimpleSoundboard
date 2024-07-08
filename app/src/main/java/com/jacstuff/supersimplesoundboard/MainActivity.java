@@ -318,7 +318,6 @@ public class MainActivity extends AppCompatActivity implements MainView {
     );
 
 
-
     private void setupRecordingButtons(){
         recordSoundButton = findViewById(R.id.recordSoundButton);
         recordSoundButton.setOnClickListener(v -> audioRecorder.toggleRecord());

@@ -14,4 +14,8 @@
     <string name="sound_button_6">6</string>
     <string name="sound_button_7">7</string>
     <string name="sound_button_8">8</string>
+    <string name="sound_button_9">9</string>
+    <string name="sound_button_10">10</string>
+    <string name="sound_button_11">11</string>
+    <string name="sound_button_12">12</string>
 </resources>

@@ -65,6 +65,13 @@ public class StepPlayer {
     }
 
 
+    public void clearAllSteps(){
+        stop();
+        currentStepIndex = 0;
+        songPart.clearAllSteps();
+    }
+
+
     private void stop(){
         if(!isPlaying.get()){
             return;

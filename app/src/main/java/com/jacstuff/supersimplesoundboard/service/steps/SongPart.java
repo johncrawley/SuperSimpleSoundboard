@@ -145,6 +145,13 @@ public class SongPart {
     }
 
 
+    public void clearAllSteps(){
+        initSoundsPerStepList();
+        initEnabledSteps();
+        updateView();
+    }
+
+
     public void setView(MainView view){
         this.view = view;
     }

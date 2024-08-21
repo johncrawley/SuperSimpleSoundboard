@@ -142,11 +142,17 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
     }
 
 
+
     @Override
     public void stopAndReset(){
         stepPlayer.stopAndReset();
     }
 
+
+    @Override
+    public void clear(){
+        stepPlayer.clearAllSteps();
+    }
 
     @Override
     public void setBpm(int bpm){

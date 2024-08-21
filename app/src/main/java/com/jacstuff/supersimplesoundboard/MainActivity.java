@@ -30,6 +30,7 @@ import com.jacstuff.supersimplesoundboard.view.MainView;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 
 public class MainActivity extends AppCompatActivity implements MainView {
@@ -44,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements MainView {
     private SoundBoardServiceImpl service;
     private final AtomicBoolean isServiceConnected = new AtomicBoolean();
     private AudioRecorder audioRecorder;
-    private Button recordSoundButton, playRecordingButton;
 
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
@@ -104,10 +104,15 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
 
     private void setupPlaybackButtons(){
-        setupButton(R.id.playButton, ()-> getService().ifPresent(SoundBoardService::play));
-        setupButton(R.id.stopButton, ()-> getService().ifPresent(SoundBoardService::stopAndReset));
+        setupServiceButton(R.id.playButton, SoundBoardService::play);
+        setupServiceButton(R.id.stopButton, SoundBoardService::stopAndReset);
+        setupServiceButton(R.id.clearButton, SoundBoardService::clear);
     }
 
+
+    private void setupServiceButton(int buttonId, Consumer<SoundBoardService> consumer){
+        setupButton(buttonId, ()-> getService().ifPresent(consumer));
+    }
 
 
 
@@ -319,10 +324,10 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
 
     private void setupRecordingButtons(){
-        recordSoundButton = findViewById(R.id.recordSoundButton);
+        Button recordSoundButton = findViewById(R.id.recordSoundButton);
         recordSoundButton.setOnClickListener(v -> audioRecorder.toggleRecord());
 
-        playRecordingButton = findViewById(R.id.playRecordingButton);
+        Button playRecordingButton = findViewById(R.id.playRecordingButton);
         playRecordingButton.setOnClickListener(v -> audioRecorder.togglePlay());
     }
 

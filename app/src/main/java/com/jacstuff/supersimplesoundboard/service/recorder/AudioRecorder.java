@@ -6,6 +6,10 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class AudioRecorder {
 
@@ -14,9 +18,11 @@ public class AudioRecorder {
     private MediaPlayer player = null;
     private boolean isRecording;
     private boolean isPlaying;
-
+    private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private Future<?> timerFuture;
 
     public AudioRecorder(Context context){
+
         setupFilePathName(context);
     }
 
@@ -26,6 +32,16 @@ public class AudioRecorder {
         } else {
             stopRecording();
         }
+    }
+
+    private void cancelTimer(){
+        if(timerFuture != null && !timerFuture.isCancelled()){
+            timerFuture.cancel(false);
+        }
+    }
+
+    private void startTimer(){
+       timerFuture = executorService.schedule(this::stopRecording, 4800, TimeUnit.MILLISECONDS);
     }
 
 
@@ -72,7 +88,9 @@ public class AudioRecorder {
     }
 
 
+
     private void startRecording() {
+        startTimer();
         isRecording = true;
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -86,6 +104,7 @@ public class AudioRecorder {
         } catch (IOException e) {
             log("startRecording() prepare() failed");
             isRecording = false;
+            cancelTimer();
         }
     }
 
@@ -96,6 +115,7 @@ public class AudioRecorder {
 
 
     private void stopRecording() {
+        cancelTimer();
         recorder.stop();
         recorder.release();
         recorder = null;

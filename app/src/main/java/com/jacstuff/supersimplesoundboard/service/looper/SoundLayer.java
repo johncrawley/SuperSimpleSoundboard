@@ -1,7 +1,5 @@
 package com.jacstuff.supersimplesoundboard.service.looper;
 
-import com.jacstuff.supersimplesoundboard.service.looper.RecordedSounds;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,7 +8,7 @@ import java.util.Set;
 
 public class SoundLayer {
     private final Map<Long, Set<Integer>> recordedSounds;
-    private int index;
+    private final int index;
 
     public SoundLayer(int index){
         this.index = index;

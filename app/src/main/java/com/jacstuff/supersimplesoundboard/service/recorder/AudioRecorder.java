@@ -83,8 +83,10 @@ public class AudioRecorder {
 
 
     private void stopPlaying() {
-        player.release();
-        player = null;
+        if(player != null){
+            player.release();
+            player = null;
+        }
     }
 
 

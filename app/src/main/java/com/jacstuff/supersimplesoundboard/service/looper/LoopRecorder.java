@@ -17,7 +17,6 @@ public class LoopRecorder {
     private SoundLayer currentLayer;
     private final Map<Long, Set<Integer>> recordedSounds;
     private long startTime;
-    private long endTime;
     private long duration;
     private int numberOfSoundsRecorded;
     private boolean isRecording;
@@ -99,7 +98,7 @@ public class LoopRecorder {
         }
         isRecording = false;
         if(isInitialLoop){
-            endTime = getCurrentTime();
+            long endTime = getCurrentTime();
             duration = endTime - startTime;
             notifyViewOfEndTime();
         }

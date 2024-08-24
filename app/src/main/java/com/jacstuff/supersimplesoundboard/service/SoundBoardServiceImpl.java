@@ -19,7 +19,6 @@ import java.util.List;
 public class SoundBoardServiceImpl extends Service implements SoundBoardService {
 
 
-    private MainActivity mainActivity;
     private final IBinder binder = new LocalBinder();
 
     private SoundPlayer soundPlayer;
@@ -62,7 +61,6 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
 
 
     public void setView(MainActivity mainActivity){
-        this.mainActivity = mainActivity;
         stepPlayer.setView(mainActivity);
         songPart.setView(mainActivity);
         if(isFirstAttach) {
@@ -142,7 +140,6 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
     }
 
 
-
     @Override
     public void stopAndReset(){
         stepPlayer.stopAndReset();
@@ -153,6 +150,7 @@ public class SoundBoardServiceImpl extends Service implements SoundBoardService 
     public void clear(){
         stepPlayer.clearAllSteps();
     }
+
 
     @Override
     public void setBpm(int bpm){

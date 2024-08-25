@@ -14,7 +14,7 @@ public class SongPart {
 
     private List<Set<SoundHolder>> soundsPerStep;
     private List<SoundHolder> soundHolders;
-    private List<List<Boolean>> enabledStepColumns = new ArrayList<>();
+    private List<List<Boolean>> stepRow = new ArrayList<>();
     private int numberOfSteps;
     private MainView view;
 
@@ -27,7 +27,7 @@ public class SongPart {
 
 
     public List<List<Boolean>> getSteps(){
-        return new ArrayList<>(enabledStepColumns);
+        return new ArrayList<>(stepRow);
     }
 
 
@@ -35,9 +35,64 @@ public class SongPart {
         if(stepColumns == null || stepColumns.isEmpty()){
             return;
         }
-        enabledStepColumns = stepColumns;
+        stepRow = stepColumns;
         updateSoundsPerStepList(stepColumns);
-        log("loadSteps() enabled steps size: " + enabledStepColumns.size());
+        log("loadSteps() enabled steps size: " + stepRow.size());
+    }
+
+
+    public void toggleSelected(int stepIndex, int soundIndex){
+        if(stepIndex >= numberOfSteps || soundIndex >= soundsPerStep.size()){
+            return;
+        }
+        toggleIndex(stepIndex, soundIndex);
+        toggleSelected(soundsPerStep.get(stepIndex), soundHolders.get(soundIndex));
+    }
+
+
+    public List<Sound> getSoundsForStep(int index){
+        return soundsPerStep.get(index).stream().map(SoundHolder::sound).collect(Collectors.toList());
+    }
+
+
+    public void clearAllSteps(){
+        for(int stepIndex = 0; stepIndex < soundsPerStep.size(); stepIndex++){
+            for(int soundIndex = 0; soundIndex < soundHolders.size(); soundIndex++){
+                setSelected(stepIndex, soundIndex, false);
+            }
+        }
+        clearSteps();
+        updateView();
+    }
+
+
+    private void clearSteps(){
+        for(int i = 0; i < stepRow.size(); i++){
+            List<Boolean> steps = stepRow.get(i);
+            int numberOfSteps = steps.size();
+            steps.clear();
+            for(int j = 0; j < numberOfSteps; j++){
+                steps.add(false);
+            }
+        }
+    }
+
+
+    public void setView(MainView view){
+        this.view = view;
+    }
+
+
+    public void updateView(){
+        if(view == null){
+            log("updateView() view is null, returning");
+            return;
+        }
+        log("entered updateView() enabledStepRows size: " + stepRow.size());
+        for(int i = 0; i < stepRow.size(); i++){
+
+            view.setStepRow(i, stepRow.get(i));
+        }
     }
 
 
@@ -56,18 +111,18 @@ public class SongPart {
 
     private void initSoundsPerStepList(){
         soundsPerStep = new ArrayList<>();
-        for(int i=0; i < numberOfSteps; i++){
+        for(int i = 0; i < numberOfSteps; i++){
             soundsPerStep.add(new HashSet<>());
         }
     }
 
 
     private void initEnabledSteps(){
-        enabledStepColumns = new ArrayList<>();
+        stepRow = new ArrayList<>();
         for(int i = 0; i < numberOfSteps; i++){
-            enabledStepColumns.add(createStepState());
+            stepRow.add(createStepState());
         }
-        log("initEnabledSteps() size: " + enabledStepColumns.size());
+        log("initEnabledSteps() size: " + stepRow.size());
     }
 
 
@@ -85,22 +140,14 @@ public class SongPart {
     }
 
 
-    public void toggleSelected(int stepIndex, int soundIndex){
-        if(stepIndex >= numberOfSteps || soundIndex >= soundsPerStep.size()){
-            return;
-        }
-        toggleIndex(stepIndex, soundIndex);
-        toggleSelected(soundsPerStep.get(stepIndex), soundHolders.get(soundIndex));
-    }
-
 
     private void toggleIndex(int stepIndex, int soundIndex){
-        log("toggleIndex() stepIndex: " + stepIndex + " soundIndex: " + soundIndex + " enabledSteps.size() : " + enabledStepColumns.size());
-        if(soundIndex >= enabledStepColumns.size()){
+        log("toggleIndex() stepIndex: " + stepIndex + " soundIndex: " + soundIndex + " enabledSteps.size() : " + stepRow.size());
+        if(soundIndex >= stepRow.size()){
             log("toggleIndex step index exceeded");
             return;
         }
-        List<Boolean> row = enabledStepColumns.get(soundIndex);
+        List<Boolean> row = stepRow.get(soundIndex);
         if(row != null && stepIndex < row.size()){
             boolean oldState = row.get(stepIndex);
             row.set(stepIndex, !oldState);
@@ -125,6 +172,9 @@ public class SongPart {
     }
 
 
+
+
+
     private void setSelectedSound(Set<SoundHolder> step, SoundHolder soundHolder, boolean isSelected){
         if(isSelected){
             step.add(soundHolder);
@@ -140,33 +190,6 @@ public class SongPart {
     }
 
 
-    public List<Sound> getSoundsForStep(int index){
-        return soundsPerStep.get(index).stream().map(SoundHolder::sound).collect(Collectors.toList());
-    }
-
-
-    public void clearAllSteps(){
-        initSoundsPerStepList();
-        initEnabledSteps();
-        updateView();
-    }
-
-
-    public void setView(MainView view){
-        this.view = view;
-    }
-
-
-    public void updateView(){
-        if(view == null){
-            log("updateView() view is null, returning");
-            return;
-        }
-        log("entered updateView() enabledStepRows size: " + enabledStepColumns.size());
-        for(int i = 0; i < enabledStepColumns.size(); i++){
-            view.setStepRow(i, enabledStepColumns.get(i));
-        }
-    }
 
 
 }

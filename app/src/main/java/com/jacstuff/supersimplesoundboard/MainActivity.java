@@ -26,6 +26,7 @@ import com.jacstuff.supersimplesoundboard.service.SoundBoardServiceImpl;
 import com.jacstuff.supersimplesoundboard.service.SoundBoardService;
 import com.jacstuff.supersimplesoundboard.service.recorder.AudioRecorder;
 import com.jacstuff.supersimplesoundboard.view.MainView;
+import com.jacstuff.supersimplesoundboard.view.RecordPlaybackView;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 
-public class MainActivity extends AppCompatActivity implements MainView {
+public class MainActivity extends AppCompatActivity implements MainView, RecordPlaybackView {
 
     private LinearLayout stepLayout;
     private TextView currentBpmText;
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
     private SoundBoardServiceImpl service;
     private final AtomicBoolean isServiceConnected = new AtomicBoolean();
     private AudioRecorder audioRecorder;
+    private Button recordButton, recordingPlaybackButton;
 
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
@@ -68,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
         super.onCreate(savedInstanceState);
         requestPermissions();
         setContentView(R.layout.activity_main);
-        audioRecorder = new AudioRecorder(getApplicationContext());
+        audioRecorder = new AudioRecorder(this, getApplicationContext());
         setupRecordingButtons();
         assignButtonLayout();
         startService();
@@ -113,7 +115,6 @@ public class MainActivity extends AppCompatActivity implements MainView {
     private void setupServiceButton(int buttonId, Consumer<SoundBoardService> consumer){
         setupButton(buttonId, ()-> getService().ifPresent(consumer));
     }
-
 
 
     private Optional<SoundBoardServiceImpl> getService(){
@@ -324,11 +325,11 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
 
     private void setupRecordingButtons(){
-        Button recordSoundButton = findViewById(R.id.recordSoundButton);
-        recordSoundButton.setOnClickListener(v -> audioRecorder.toggleRecord());
+        recordButton = findViewById(R.id.recordSoundButton);
+        recordButton.setOnClickListener(v -> audioRecorder.toggleRecord());
 
-        Button playRecordingButton = findViewById(R.id.playRecordingButton);
-        playRecordingButton.setOnClickListener(v -> audioRecorder.togglePlay());
+        recordingPlaybackButton = findViewById(R.id.playRecordingButton);
+        recordingPlaybackButton.setOnClickListener(v -> audioRecorder.togglePlay());
     }
 
 
@@ -344,4 +345,27 @@ public class MainActivity extends AppCompatActivity implements MainView {
     }
 
 
+    @Override
+    public void notifyRecordingStarted() {
+        recordingPlaybackButton.setVisibility(View.INVISIBLE);
+        recordButton.setText(getString(R.string.button_text_stop_recording));
+    }
+
+    @Override
+    public void notifyRecordingStopped() {
+        recordingPlaybackButton.setVisibility(View.VISIBLE);
+        recordButton.setText(getString(R.string.button_text_record));
+    }
+
+    @Override
+    public void notifyPlaybackStarted() {
+        recordButton.setVisibility(View.INVISIBLE);
+        recordingPlaybackButton.setText(getString(R.string.button_text_stop_recording));
+    }
+
+    @Override
+    public void notifyPlaybackStopped() {
+        recordButton.setVisibility(View.VISIBLE);
+        recordingPlaybackButton.setText(getString(R.string.button_text_play));
+    }
 }

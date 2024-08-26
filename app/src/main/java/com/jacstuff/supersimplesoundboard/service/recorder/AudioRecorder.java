@@ -5,6 +5,8 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 
+import com.jacstuff.supersimplesoundboard.view.RecordPlaybackView;
+
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -18,10 +20,10 @@ public class AudioRecorder {
     private MediaPlayer player = null;
     private boolean isRecording;
     private boolean isPlaying;
-    private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private Future<?> timerFuture;
 
-    public AudioRecorder(Context context){
+    public AudioRecorder(RecordPlaybackView recordPlaybackView, Context context){
 
         setupFilePathName(context);
     }
@@ -88,7 +90,6 @@ public class AudioRecorder {
             player = null;
         }
     }
-
 
 
     private void startRecording() {

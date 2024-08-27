@@ -2,6 +2,8 @@
     <string name="app_name">Super Simple Soundboard</string>
     <string name="button_text_record">Record</string>
     <string name="button_text_stop_recording">Stop</string>
+    <string name="button_text_playback">Play</string>
+    <string name="button_text_stop_playback">Stop</string>
     <string name="button_text_stop">Stop</string>
     <string name="button_text_play">Play</string>
     <string name="button_text_clear">Clear</string>

@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements MainView, RecordP
     private SoundBoardServiceImpl service;
     private final AtomicBoolean isServiceConnected = new AtomicBoolean();
     private AudioRecorder audioRecorder;
-    private Button recordButton, recordingPlaybackButton;
+    private Button recordButton, stopRecordingButton, recordingPlaybackButton, stopPlaybackButton;
 
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
@@ -126,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements MainView, RecordP
         ImageButton button = findViewById(id);
         button.setOnClickListener(v -> runnable.run());
     }
-
 
 
     public void setStep(int stepIndex, List<Boolean> enabledList) {
@@ -326,10 +325,17 @@ public class MainActivity extends AppCompatActivity implements MainView, RecordP
 
     private void setupRecordingButtons(){
         recordButton = findViewById(R.id.recordSoundButton);
-        recordButton.setOnClickListener(v -> audioRecorder.toggleRecord());
+        recordButton.setOnClickListener(v -> audioRecorder.startRecording());
+
+        stopRecordingButton = findViewById(R.id.stopRecordingSoundButton);
+        stopRecordingButton.setOnClickListener(v -> audioRecorder.stopRecording());
 
         recordingPlaybackButton = findViewById(R.id.playRecordingButton);
-        recordingPlaybackButton.setOnClickListener(v -> audioRecorder.togglePlay());
+        recordingPlaybackButton.setOnClickListener(v -> audioRecorder.startPlaying());
+
+
+        stopPlaybackButton = findViewById(R.id.stopPlaybackButton);
+        stopPlaybackButton.setOnClickListener(v -> audioRecorder.stopPlaying());
     }
 
 
@@ -347,25 +353,42 @@ public class MainActivity extends AppCompatActivity implements MainView, RecordP
 
     @Override
     public void notifyRecordingStarted() {
-        recordingPlaybackButton.setVisibility(View.INVISIBLE);
-        recordButton.setText(getString(R.string.button_text_stop_recording));
+        stopPlaybackButton.setVisibility(View.GONE);
+        recordingPlaybackButton.setVisibility(View.GONE);
+        recordButton.setVisibility(View.GONE);
+        stopRecordingButton.setVisibility(View.VISIBLE);
     }
+
 
     @Override
     public void notifyRecordingStopped() {
+        stopPlaybackButton.setVisibility(View.GONE);
         recordingPlaybackButton.setVisibility(View.VISIBLE);
-        recordButton.setText(getString(R.string.button_text_record));
+        recordButton.setVisibility(View.VISIBLE);
+        stopRecordingButton.setVisibility(View.GONE);
+        log("entered notifyRecordingStopped()");
     }
+
+
+    private void log(String msg){
+        System.out.println("^^^ MainActivity : " + msg);
+    }
+
 
     @Override
     public void notifyPlaybackStarted() {
-        recordButton.setVisibility(View.INVISIBLE);
-        recordingPlaybackButton.setText(getString(R.string.button_text_stop_recording));
+        stopPlaybackButton.setVisibility(View.VISIBLE);
+        recordingPlaybackButton.setVisibility(View.GONE);
+        recordButton.setVisibility(View.GONE);
+        stopRecordingButton.setVisibility(View.GONE);
     }
+
 
     @Override
     public void notifyPlaybackStopped() {
+        stopPlaybackButton.setVisibility(View.GONE);
+        recordingPlaybackButton.setVisibility(View.VISIBLE);
         recordButton.setVisibility(View.VISIBLE);
-        recordingPlaybackButton.setText(getString(R.string.button_text_play));
+        stopRecordingButton.setVisibility(View.GONE);
     }
 }

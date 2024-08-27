@@ -18,23 +18,15 @@ public class AudioRecorder {
     private static String fileName = null;
     private MediaRecorder recorder = null;
     private MediaPlayer player = null;
-    private boolean isRecording;
-    private boolean isPlaying;
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private Future<?> timerFuture;
+    private final RecordPlaybackView recordPlaybackView;
 
     public AudioRecorder(RecordPlaybackView recordPlaybackView, Context context){
-
+        this.recordPlaybackView = recordPlaybackView;
         setupFilePathName(context);
     }
 
-    public void toggleRecord(){
-        if (!isRecording) {
-            startRecording();
-        } else {
-            stopRecording();
-        }
-    }
 
     private void cancelTimer(){
         if(timerFuture != null && !timerFuture.isCancelled()){
@@ -42,16 +34,9 @@ public class AudioRecorder {
         }
     }
 
+
     private void startTimer(){
        timerFuture = executorService.schedule(this::stopRecording, 4800, TimeUnit.MILLISECONDS);
-    }
-
-
-    public void togglePlay(){
-        if(isRecording){
-            stopRecording();
-        }
-        playRecordedSound();
     }
 
 
@@ -60,41 +45,32 @@ public class AudioRecorder {
     }
 
 
-    private void playRecordedSound() {
-        if (!isPlaying) {
-            startPlaying();
-        } else {
-            stopPlaying();
-        }
-    }
 
-
-    private void startPlaying() {
+    public void startPlaying() {
         player = new MediaPlayer();
         try {
             player.setDataSource(fileName);
             player.prepare();
             player.start();
-            isPlaying = true;
-            player.setOnCompletionListener(mediaPlayer -> isPlaying = false);
+            recordPlaybackView.notifyPlaybackStarted();
+            player.setOnCompletionListener(mediaPlayer -> recordPlaybackView.notifyPlaybackStopped());
         } catch (IOException e) {
-            isPlaying = false;
             log("start playing prepare() failed");
         }
     }
 
 
-    private void stopPlaying() {
+    public void stopPlaying() {
         if(player != null){
             player.release();
             player = null;
+            recordPlaybackView.notifyPlaybackStopped();
         }
     }
 
 
-    private void startRecording() {
+    public void startRecording() {
         startTimer();
-        isRecording = true;
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -104,9 +80,9 @@ public class AudioRecorder {
         try {
             recorder.prepare();
             recorder.start();
+            recordPlaybackView.notifyRecordingStarted();
         } catch (IOException e) {
             log("startRecording() prepare() failed");
-            isRecording = false;
             cancelTimer();
         }
     }
@@ -117,12 +93,14 @@ public class AudioRecorder {
     }
 
 
-    private void stopRecording() {
+    public void stopRecording() {
+        log("Entered stopRecording()");
         cancelTimer();
         recorder.stop();
         recorder.release();
         recorder = null;
-        isRecording = false;
+        recordPlaybackView.notifyRecordingStopped();
+        log("exiting stopRecording()");
     }
 
 

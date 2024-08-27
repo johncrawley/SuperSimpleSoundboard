@@ -22,14 +22,27 @@
             android:id="@+id/recordSoundButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="record"/>
+            android:text="@string/button_text_record"/>
+
+
+        <Button
+            android:id="@+id/stopRecordingSoundButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_text_stop_recording"/>
+
         <Button
             android:id="@+id/playRecordingButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="stop"/>
+            android:text="@string/button_text_playback"/>
 
 
+        <Button
+            android:id="@+id/stopPlaybackButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_text_stop_playback"/>
 
     </LinearLayout>
 
